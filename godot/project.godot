@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[autoload]
+
+ScreenRouter="*res://core/screen_router.gd"
+
 [dotnet]
 
 project/assembly_name="Arcade Launcher Corpo"
