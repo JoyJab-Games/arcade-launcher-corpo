@@ -4,5 +4,5 @@ compatibility_minimum = 4.2
 reloadable = true
 
 [libraries]
-linux.debug.x86_64 = "res://../rust/target/debug/liblauncher_core.so"
-linux.release.x86_64 = "res://../rust/target/release/liblauncher_core.so"
+linux.debug.x86_64 = "res://../rust/target/debug/libarcade_gdext.so"
+linux.release.x86_64 = "res://../rust/target/release/libarcade_gdext.so"

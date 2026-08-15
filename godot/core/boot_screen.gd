@@ -1,7 +1,14 @@
 ## The ~2 second black screen shown at cold start. Gives a brief window to
-## reach the admin prompt via a single short Guide-button press before
-## falling through to FrontFlow.resolve(). Jesco's scene just needs to
-## extend this and be black — no other content required.
+## reach WiFi setup via a single short Guide-button press before falling
+## through to FrontFlow.resolve(). Jesco's scene just needs to extend this
+## and be black — no other content required.
+##
+## Admin tasks (install/remove/release games, etc.) moved to the `arcade`
+## CLI over SSH — there's no in-app admin menu/password anymore. The only
+## thing that still needs on-device UI is WiFi setup (has to work before
+## SSH access is even possible). The secret shortcut (both Guide buttons
+## held 3s elsewhere, a single short press here during boot) now leads
+## straight to WiFi setup, no password.
 class_name BootScreen
 extends Screen
 
@@ -25,13 +32,13 @@ func enter(_context: Dictionary = {}) -> void:
 	_timer.start()
 
 
-# TODO(Phase 2): call this from the Rust evdev Guide-button listener when a
+# TODO(Phase 3): call this from the Rust evdev Guide-button listener when a
 # single short press happens while Boot is on top of the stack. Needs the
-# AdminPrompt screen to exist first (also Phase 2).
+# WifiSetupScreen to exist first.
 func _on_admin_shortcut_during_boot() -> void:
 	if _timer:
 		_timer.stop()
-	# push(admin_prompt_scene) once AdminPrompt exists.
+	# push(wifi_setup_scene) once WifiSetupScreen exists.
 
 
 func _on_boot_window_elapsed() -> void:

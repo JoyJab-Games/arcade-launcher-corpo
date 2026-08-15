@@ -1,0 +1,12 @@
+[package]
+name = "arcade-cli"
+version = "0.1.0"
+edition.workspace = true
+
+[[bin]]
+name = "arcade"
+path = "src/main.rs"
+
+[dependencies]
+arcade-core = { path = "../core" }
+clap = { version = "4", features = ["derive"] }

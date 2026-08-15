@@ -1,11 +1,6 @@
-[package]
-name = "launcher_core"
-version = "0.1.0"
+[workspace]
+resolver = "2"
+members = ["core", "gdext", "cli"]
+
+[workspace.package]
 edition = "2021"
-
-[lib]
-crate-type = ["cdylib"]   # wichtig: dynamische Library
-
-[dependencies]
-godot = "0.4"             # gdext
-zbus = "5"                # später für NetworkManager/udisks2

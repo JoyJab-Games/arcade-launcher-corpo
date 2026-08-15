@@ -1,0 +1,11 @@
+[package]
+name = "arcade-gdext"
+version = "0.1.0"
+edition.workspace = true
+
+[lib]
+name = "arcade_gdext"
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = "0.4"
