@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game_library/game_card.gd" id="1_script"]
+
+[node name="GameCard" type="Control"]
+layout_mode = 3
+focus_mode = 2
+script = ExtResource("1_script")

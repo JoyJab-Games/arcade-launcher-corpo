@@ -4,12 +4,13 @@
 ## exists — Phase 1), so the roster is rebuilt fresh on every entry in case
 ## an admin changed what's released while a game was running.
 ##
-## Jesco's scene provides `card_container` (any Container to add cards
-## into) and `card_scene` (a PackedScene whose root extends GameCard).
+## Jesco's scene provides a Container marked "Access as Unique Name" as
+## %CardContainer (any Container works — cards get added into it) and sets
+## `card_scene` (a PackedScene whose root extends GameCard) in the Inspector.
 class_name GameSelectionScreen
 extends Screen
 
-@export var card_container: Container
+@onready var card_container: Container = %CardContainer
 @export var card_scene: PackedScene
 
 var _cards: Array[GameCard] = []
