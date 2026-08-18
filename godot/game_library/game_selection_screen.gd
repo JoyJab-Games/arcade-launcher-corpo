@@ -4,9 +4,11 @@
 ## exists — Phase 1), so the roster is rebuilt fresh on every entry in case
 ## an admin changed what's released while a game was running.
 ##
-## Jesco's scene provides a Container marked "Access as Unique Name" as
-## %CardContainer (any Container works — cards get added into it) and sets
-## `card_scene` (a PackedScene whose root extends GameCard) in the Inspector.
+## The scene provides a GridContainer(columns=4) marked "Access as Unique
+## Name" as %CardContainer — GridContainer specifically, so Godot's
+## automatic focus-neighbor resolution gives correct up/down/left/right grid
+## navigation for free — and sets `card_scene` (a PackedScene whose root
+## extends GameCard) in the Inspector.
 class_name GameSelectionScreen
 extends Screen
 

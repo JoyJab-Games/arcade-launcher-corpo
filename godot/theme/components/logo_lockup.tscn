@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://4njkkih41bhv"]
+
+[ext_resource type="Script" uid="uid://bbbrqieiqb0tr" path="res://theme/components/logo_lockup.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cm6lbrk1lfxe8" path="res://theme/branding/logo_color.png" id="2_0myj2"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_theme"]
+
+[node name="LogoLockup" type="PanelContainer" unique_id=1243089839]
+offset_top = -35.778145
+offset_right = 374.6587
+offset_bottom = 184.22186
+theme = ExtResource("2_theme")
+theme_type_variation = &"LogoContainer"
+script = ExtResource("1_script")
+
+[node name="Logo" type="TextureRect" parent="." unique_id=155965663]
+custom_minimum_size = Vector2(198.65868, 132)
+layout_mode = 2
+texture = ExtResource("2_0myj2")
+expand_mode = 1

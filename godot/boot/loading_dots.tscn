@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bdy3wq77mhpud"]
+
+[ext_resource type="Script" uid="uid://c0cjq0mu3c15d" path="res://boot/loading_dots.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_theme"]
+
+[node name="LoadingDots" type="HBoxContainer" unique_id=35202616]
+theme = ExtResource("2_theme")
+theme_override_constants/separation = 16
+script = ExtResource("1_script")
+
+[node name="Dot1" type="Panel" parent="." unique_id=696806132]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+theme_type_variation = &"LoadingDot"
+
+[node name="Dot2" type="Panel" parent="." unique_id=1491877465]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+theme_type_variation = &"LoadingDot"
+
+[node name="Dot3" type="Panel" parent="." unique_id=128998626]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+theme_type_variation = &"LoadingDot"

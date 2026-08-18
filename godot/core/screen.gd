@@ -1,9 +1,14 @@
-## Base class every screen managed by ScreenRouter extends. Jesco builds the
-## actual scenes (layout/theme); this just defines the contract ScreenRouter
-## drives them through — mark the node that should get initial focus as
-## "Access as Unique Name" -> %InitialFocus (optional — screens with nothing
-## focusable can skip it), emit `close_requested` on back/cancel, override
+## Base class every screen managed by ScreenRouter extends — mark the node
+## that should get initial focus as "Access as Unique Name" -> %InitialFocus
+## (optional — screens with nothing focusable can skip it), override
 ## enter()/exit() (calling super()) for anything else.
+##
+## GameAction.BACK (B, red — always means the same thing everywhere) is
+## handled here by default: it emits close_requested, whether or not this
+## screen shows a Back hint pill for it. A screen with different back
+## semantics (e.g. the password screen, where a tap deletes a character and
+## only a 700ms hold cancels) overrides _unhandled_input itself instead of
+## relying on this default.
 ##
 ## Node-typed @export vars don't reliably resolve when hand-authoring .tscn
 ## and were flaky in testing even via normal scene setup — %UniqueName +
@@ -39,3 +44,9 @@ func enter(_context: Dictionary = {}) -> void:
 ## Override for cleanup; call super() to keep the focus-restore behavior.
 func exit() -> void:
 	_last_focus = get_viewport().gui_get_focus_owner()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(GameAction.BACK):
+		get_viewport().set_input_as_handled()
+		close_requested.emit()

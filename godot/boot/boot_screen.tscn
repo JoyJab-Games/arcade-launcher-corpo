@@ -1,10 +1,61 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dagkaiqa6ug3m"]
 
-[ext_resource type="Script" path="res://boot/boot_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://tv2kap76d6or" path="res://boot/boot_screen.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_rkjvk"]
+[ext_resource type="PackedScene" uid="uid://bdy3wq77mhpud" path="res://boot/loading_dots.tscn" id="3_smvwk"]
+[ext_resource type="PackedScene" uid="uid://4njkkih41bhv" path="res://theme/components/logo_lockup.tscn" id="4_logo"]
 
-[node name="BootScreen" type="Control"]
+[node name="BootScreen" type="Control" unique_id=96447649]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="." unique_id=828133452]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_rkjvk")
+theme_type_variation = &"PanelBackground"
+
+[node name="HintLabel" type="Label" parent="." unique_id=1492810245]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("2_rkjvk")
+theme_type_variation = &"LabelMicro"
+text = "ARCADE WIRD GESTARTET"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LogoGroup" type="VBoxContainer" parent="." unique_id=1655470561]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="LogoLockup" parent="LogoGroup" unique_id=2113374410 instance=ExtResource("4_logo")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="LoadingDots" parent="LogoGroup" unique_id=468359381 instance=ExtResource("3_smvwk")]
+layout_mode = 2
+size_flags_horizontal = 4

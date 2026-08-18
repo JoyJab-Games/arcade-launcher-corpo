@@ -1,10 +1,74 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://uh6cxaahew68"]
 
-[ext_resource type="Script" path="res://game_library/needs_help_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cuy2pl1rknhir" path="res://game_library/needs_help_screen.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_2lq30"]
+[ext_resource type="FontFile" uid="uid://c16evw1e7efu3" path="res://theme/font/Fredoka-Bold.ttf" id="3_8iswb"]
 
-[node name="NeedsHelpScreen" type="Control"]
+[node name="NeedsHelpScreen" type="Control" unique_id=1547495952]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="." unique_id=982479377]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_2lq30")
+theme_type_variation = &"PanelBackground"
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1810124760]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -315.0
+offset_top = -183.0
+offset_right = 344.0
+offset_bottom = 179.0
+theme = ExtResource("2_2lq30")
+theme_type_variation = &"LargeContainer"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=923227921]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="PanelContainer/VBoxContainer" unique_id=745044318]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("2_2lq30")
+theme_type_variation = &"LoadingDot"
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/Panel" unique_id=252088340]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_2lq30")
+theme_override_fonts/font = ExtResource("3_8iswb")
+theme_override_font_sizes/font_size = 80
+text = "I"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=2001332213]
+layout_mode = 2
+theme = ExtResource("2_2lq30")
+theme_type_variation = &"LabelDisplay"
+text = "Noch keine Spiele freigegeben"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer" unique_id=1285791297]
+layout_mode = 2
+text = "Bitte frage einen Admin um Hilfe."
+horizontal_alignment = 1

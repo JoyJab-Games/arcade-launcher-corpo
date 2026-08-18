@@ -1,8 +1,78 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://b8yeocoiram6h"]
 
-[ext_resource type="Script" path="res://game_library/game_card.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="1_b15d4"]
+[ext_resource type="Script" uid="uid://b1m3muvw26heh" path="res://game_library/game_card.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://i4haibtqsmdy" path="res://icon.svg" id="3_yhc35"]
 
-[node name="GameCard" type="Control"]
-layout_mode = 3
+[node name="GameCard" type="PanelContainer" unique_id=623022853]
+custom_minimum_size = Vector2(377, 257)
+offset_right = 377.0
+offset_bottom = 257.0
+size_flags_vertical = 4
 focus_mode = 2
+theme = ExtResource("1_b15d4")
+theme_type_variation = &"PanelCard"
 script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1690740688]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="VBoxContainer" unique_id=933139529]
+custom_minimum_size = Vector2(353, 180)
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+ratio = 1.7778
+stretch_mode = 3
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/AspectRatioContainer" unique_id=1664091381]
+layout_mode = 2
+size_flags_vertical = 3
+texture = ExtResource("3_yhc35")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=650599237]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer" unique_id=473970604]
+custom_minimum_size = Vector2(15, 15)
+custom_maximum_size = Vector2(15, 15)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"LoadingDot"
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1826553719]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"LabelTitle"
+text = "Wummsen Village"
+autowrap_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer" unique_id=162976026]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_type_variation = &"LabelMicro"
+text = "Genmodifizierte Kakten boxen sich absolut weg jaja."
+autowrap_mode = 2
+
+[node name="TagRow" type="HFlowContainer" parent="VBoxContainer" unique_id=903507857]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Tag" type="PanelContainer" parent="VBoxContainer/TagRow" unique_id=1701873725]
+custom_minimum_size = Vector2(26, 0)
+layout_mode = 2
+theme_type_variation = &"PanelPill"
+
+[node name="Label" type="Label" parent="VBoxContainer/TagRow/Tag" unique_id=2040721109]
+layout_mode = 2
+theme = ExtResource("1_b15d4")
+theme_type_variation = &"LabelMicro"
+text = "2 Spieler"
+horizontal_alignment = 1
+vertical_alignment = 1

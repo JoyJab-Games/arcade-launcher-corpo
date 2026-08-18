@@ -1,19 +1,93 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://chr3sr7e5iaci"]
 
-[ext_resource type="Script" path="res://game_library/game_selection_screen.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://game_library/game_card.tscn" id="2_card"]
+[ext_resource type="Script" uid="uid://pbt7dewgm6fe" path="res://game_library/game_selection_screen.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://b8yeocoiram6h" path="res://game_library/game_card.tscn" id="2_card"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="3_v4cjn"]
 
-[node name="GameSelectionScreen" type="Control"]
+[node name="GameSelectionScreen" type="Control" unique_id=167520431]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
 card_scene = ExtResource("2_card")
 
-[node name="CardContainer" type="Container" parent="."]
-unique_name_in_owner = true
+[node name="Background" type="Panel" parent="." unique_id=1940045834]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_v4cjn")
+theme_type_variation = &"PanelBackground"
+
+[node name="Panel" type="Panel" parent="." unique_id=1392547605]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 177.0
+grow_horizontal = 2
+theme = ExtResource("3_v4cjn")
+theme_type_variation = &"TopBackground"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2130162951]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 84
+theme_override_constants/margin_top = 56
+theme_override_constants/margin_right = 84
+theme_override_constants/margin_bottom = 56
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1788046907]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=366310751]
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=261146375]
+layout_mode = 2
+theme = ExtResource("3_v4cjn")
+theme_type_variation = &"LabelDisplay"
+text = "Spiele"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=1822640506]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="CardContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=2123222179]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 40
+columns = 4
+
+[node name="GameCard" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=1780414189 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
+
+[node name="GameCard2" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=623022853 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
+
+[node name="GameCard3" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=973367393 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
+
+[node name="GameCard4" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=169295860 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
+
+[node name="GameCard5" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=2013547865 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
+
+[node name="GameCard6" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=156567668 instance_placeholder="res://game_library/game_card.tscn"]
+layout_mode = 2
