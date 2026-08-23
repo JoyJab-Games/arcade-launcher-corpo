@@ -4,6 +4,7 @@ pub mod metadata;
 pub mod power;
 pub mod release;
 pub mod remove;
+pub mod select;
 pub mod update;
 
 use arcade_core::sources::steam::SteamSource;

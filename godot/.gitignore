@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Rust GDExtension build output, copied in here (from /rust/target/) rather
+# than referenced there directly - see rust.gdextension's doc comment.
+/bin/

@@ -25,6 +25,8 @@ enum Command {
     Release { name: String },
     /// Unrelease a game (hide it from players again).
     Unrelease { name: String },
+    /// Interactively toggle which installed games are released, all at once.
+    Select,
     /// Power off the device.
     Shutdown,
     /// Reboot the device.
@@ -42,6 +44,7 @@ fn main() {
         Command::List => commands::list::run(&store),
         Command::Release { name } => commands::release::run(&store, &name, true),
         Command::Unrelease { name } => commands::release::run(&store, &name, false),
+        Command::Select => commands::select::run(&store),
         Command::Shutdown => commands::power::shutdown(),
         Command::Reboot => commands::power::reboot(),
     };

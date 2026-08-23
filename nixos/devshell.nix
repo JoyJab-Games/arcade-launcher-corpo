@@ -1,10 +1,7 @@
 # Dev environment: `nix develop` from the repo root.
-# Rust version is pinned via rust-overlay — `stable.latest` resolves against
-# whatever rust-overlay revision flake.lock is pinned to, so it's fixed and
-# reproducible until someone deliberately runs `nix flake update`.
 { pkgs }:
 let
-  rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+  rustToolchain = (import ./rust-toolchain.nix { inherit pkgs; }).override {
     extensions = [ "rust-src" "rust-analyzer" ];
   };
 in
@@ -17,5 +14,9 @@ pkgs.mkShell {
     # downloads (see rust/core/src/sources/steam.rs). Unfree-licensed —
     # config.allowUnfree is set where `pkgs` is constructed, see default.nix.
     pkgs.steamcmd
+    # `arcade_core::launch` shells out to `umu-run` (its `PROTONPATH` set to
+    # a build `arcade install`/`update` predownloaded via steamcmd) to
+    # launch Proton/Windows games — see rust/core/src/launch.rs.
+    pkgs.umu-launcher
   ];
 }

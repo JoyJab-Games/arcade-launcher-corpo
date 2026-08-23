@@ -4,5 +4,12 @@ compatibility_minimum = 4.2
 reloadable = true
 
 [libraries]
-linux.debug.x86_64 = "res://../rust/target/debug/libarcade_gdext.so"
-linux.release.x86_64 = "res://../rust/target/release/libarcade_gdext.so"
+; Paths deliberately live *inside* res:// (godot/bin/, gitignored, populated
+; by cargo/Nix - see nixos/apps/dev.nix and the `default` package) rather
+; than reaching out to ../rust/target/ directly. A res://../ path resolves
+; fine in the editor (real filesystem, relative to the project file) but
+; isn't something Godot's exporter can see or bundle - a `--export-release`
+; build needs the library to actually be inside the project tree it's
+; packaging.
+linux.debug.x86_64 = "res://bin/debug/libarcade_gdext.so"
+linux.release.x86_64 = "res://bin/release/libarcade_gdext.so"

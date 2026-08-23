@@ -72,11 +72,13 @@ impl GameSource for SteamSource {
     /// store page's crowd-sourced tags — there's no official API for those
     /// — but real data with no scraping involved), an image (preferring the
     /// Library Header over the plain store header, see
-    /// find_asset_hash/find_linux_executable below), and the Linux
-    /// executable path. Any field can come back empty (bad AppID, no
-    /// genres listed, no image at all, no Linux build); that's not an
-    /// error, the CLI's manual-entry fallback covers tags/image, and
-    /// `arcade_core::launch` reports clearly if exec is unset.
+    /// find_asset_hash/find_linux_executable below), and the executable
+    /// path — Linux if there's a native build, else Windows (which also
+    /// sets `proton`, see GameMetadata's doc comment). Any field can come
+    /// back empty (bad AppID, no genres listed, no image at all, no build
+    /// for either platform); that's not an error, the CLI's manual-entry
+    /// fallback covers tags/image, and `arcade_core::launch` reports
+    /// clearly if exec is unset.
     fn fetch_metadata(&self, game: &ResolvedGame) -> io::Result<GameMetadata> {
         let mut metadata = GameMetadata::default();
 
@@ -124,7 +126,13 @@ impl GameSource for SteamSource {
                     game.source_ref
                 ));
             }
-            metadata.exec = find_linux_executable(&app_info);
+            if let Some(exec) = find_linux_executable(&app_info) {
+                metadata.exec = Some(exec);
+                metadata.proton = Some(false);
+            } else if let Some(exec) = find_windows_executable(&app_info) {
+                metadata.exec = Some(exec);
+                metadata.proton = Some(true);
+            }
         }
 
         Ok(metadata)
@@ -167,17 +175,17 @@ fn find_asset_hash<'a>(text: &'a str, key: &str) -> Option<&'a str> {
     }
 }
 
-/// Finds the Linux executable path from an appinfo VDF's `config.launch`
-/// entries, e.g. `"1" { "executable" "Foo.x86_64" "config" { "oslist"
-/// "linux" } }` — one entry per platform, per Valve's schema.
+/// Finds the executable path for whichever `config.launch` entry's `oslist`
+/// mentions `platform`, e.g. `"1" { "executable" "Foo.x86_64" "config" {
+/// "oslist" "linux" } }` — one entry per platform, per Valve's schema.
 ///
 /// Same lenient-scan approach as find_asset_hash: walks `"executable"`
 /// occurrences in order; for each, the text up to the *next* `"executable"`
 /// occurrence is that same launch entry's own scope (Valve always emits an
 /// entry's oslist before the next entry's executable), so the first
 /// `"oslist"` found within that scope belongs to it. Returns the first
-/// entry whose oslist mentions "linux".
-fn find_linux_executable(text: &str) -> Option<String> {
+/// entry whose oslist mentions `platform`.
+fn find_executable_for_platform(text: &str, platform: &str) -> Option<String> {
     let mut rest = text;
     loop {
         let after_exec = rest.split_once("\"executable\"")?.1;
@@ -189,7 +197,7 @@ fn find_linux_executable(text: &str) -> Option<String> {
             // first quoted token" instead of its value.
             let after_oslist_key = &entry_scope[oslist_pos + "\"oslist\"".len()..];
             if let Some(oslist) = quoted_token_after(after_oslist_key) {
-                if oslist.contains("linux") {
+                if oslist.contains(platform) {
                     return quoted_token_after(after_exec).map(str::to_string);
                 }
             }
@@ -197,6 +205,17 @@ fn find_linux_executable(text: &str) -> Option<String> {
 
         rest = after_exec;
     }
+}
+
+fn find_linux_executable(text: &str) -> Option<String> {
+    find_executable_for_platform(text, "linux")
+}
+
+/// The Windows launch entry — a game with one of these but no Linux entry
+/// needs Proton (see `fetch_metadata`, which sets `GameMetadata.proton`
+/// from exactly that).
+fn find_windows_executable(text: &str) -> Option<String> {
+    find_executable_for_platform(text, "windows")
 }
 
 /// The first quoted string in `text` (its own quotes not included).
@@ -322,6 +341,32 @@ mod tests {
             find_linux_executable(LAUNCH_FIXTURE),
             Some("WummsenVillage.x86_64".to_string())
         );
+    }
+
+    #[test]
+    fn find_windows_executable_picks_the_windows_entry() {
+        assert_eq!(
+            find_windows_executable(LAUNCH_FIXTURE),
+            Some("WummsenVillage.exe".to_string())
+        );
+    }
+
+    #[test]
+    fn find_windows_executable_returns_none_without_a_windows_entry() {
+        let linux_only = r#"
+            "launch"
+            {
+                "0"
+                {
+                    "executable"		"Foo.x86_64"
+                    "config"
+                    {
+                        "oslist"		"linux"
+                    }
+                }
+            }
+        "#;
+        assert_eq!(find_windows_executable(linux_only), None);
     }
 
     #[test]

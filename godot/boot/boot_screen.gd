@@ -18,11 +18,13 @@ extends Screen
 ## Scenes FrontFlow routes to once the boot window elapses.
 @export var needs_help_scene: PackedScene
 @export var selection_scene: PackedScene
+@export var game_running_scene: PackedScene
 
 var _timer: Timer
 
 
 func enter(_context: Dictionary = {}) -> void:
+	print("boot window elapsed")
 	super.enter(_context)
 	_timer = Timer.new()
 	_timer.one_shot = true
@@ -42,4 +44,5 @@ func _on_admin_shortcut_during_boot() -> void:
 
 
 func _on_boot_window_elapsed() -> void:
-	FrontFlow.resolve(needs_help_scene, selection_scene)
+	print("boot window elapsed")
+	FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene)

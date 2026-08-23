@@ -13,6 +13,12 @@ serde_json = "1"
 # synchronous/foreground-blocking (see ProcessLock's doc comment), so no
 # reason to pull in an async runtime just for a couple of plain GETs.
 ureq = "2"
+# gamescope's X11-atom focus-control protocol (see src/gamescope.rs) —
+# the same crate OpenGamepadUI's own author built for this exact purpose,
+# reused rather than hand-rolling X11 atom manipulation ourselves. Pinned
+# to a commit (not on crates.io) for the same reproducibility reasons
+# everything else here is pinned.
+gamescope-x11-client = { git = "https://github.com/ShadowBlip/gamescope-x11-client", rev = "922e02a8c941c278e665639c57a1822abd31bee3" }
 
 [dev-dependencies]
 tempfile = "3"

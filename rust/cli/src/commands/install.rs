@@ -50,13 +50,29 @@ pub fn run(store: &GameStore) -> Result<(), Box<dyn Error>> {
     let tags = metadata::resolve_tags(fetched.tags)?;
     let image_path = metadata::resolve_image(fetched.image_url, &game_dir)?;
 
+    // `fetch_metadata` already told us whether this is a Windows-only game
+    // (no native Linux build) by way of `proton` — predownload its Proton
+    // build now, so a bad/missing build fails loudly here rather than
+    // surprising a player at first launch (see
+    // `arcade_core::sources::proton::provision`'s doc comment).
+    let proton = fetched.proton.unwrap_or(false);
+    let proton_version = if proton {
+        let version = arcade_core::sources::proton::DEFAULT_VERSION.to_string();
+        println!("'{name}' has no Linux build — fetching Proton ({version})...");
+        arcade_core::sources::proton::provision(&arcade_core::proton_dir(), &version)?;
+        Some(version)
+    } else {
+        None
+    };
+
     store.save(&GameConfig {
         name: name.clone(),
         source: source.id().to_string(),
         source_ref: resolved.source_ref,
         branch: resolved.branch,
         exec: fetched.exec,
-        proton: false,
+        proton,
+        proton_version,
         prefix_path: None,
         released_for_players: false,
         description: fetched.description,

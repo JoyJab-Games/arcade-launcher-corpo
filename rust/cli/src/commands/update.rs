@@ -41,17 +41,51 @@ pub fn run(store: &GameStore, name: &str) -> Result<(), Box<dyn Error>> {
     let image_path = metadata::resolve_image(fetched.image_url, &game_dir)?;
 
     // A re-fetch that finds nothing (network hiccup, schema drift) keeps
-    // whatever exec/description was already on record rather than
-    // clobbering a working value with None — same non-destructive-on-
-    // failure approach as tags/image_path above.
+    // whatever exec/description/proton was already on record rather than
+    // clobbering a working value with None/false — same non-destructive-
+    // on-failure approach as tags/image_path above.
+    let proton = fetched.proton.unwrap_or(existing.proton);
+    let proton_version = resolve_proton_version(proton, existing.proton_version.clone())?;
+
     store.save(&GameConfig {
         exec: fetched.exec.or_else(|| existing.exec.clone()),
         description: fetched.description.or_else(|| existing.description.clone()),
         tags,
         image_path,
+        proton,
+        proton_version,
         ..existing
     })?;
 
     println!("Updated '{name}'.");
     Ok(())
+}
+
+/// Ensures `version`'s Proton build is on disk before `update` finishes —
+/// same "fail loudly now, not at launch" approach `provision()` above takes
+/// for the game's own files. A build that's already cached is only
+/// re-fetched if the admin opts in: Proton Experimental is a rolling
+/// target under a fixed AppID (see `arcade_core::sources::proton`), so a
+/// bare `arcade update <name>` shouldn't silently swap it out from under a
+/// working game just because the admin wanted to refresh a preview image.
+fn resolve_proton_version(
+    proton: bool,
+    existing_version: Option<String>,
+) -> Result<Option<String>, Box<dyn Error>> {
+    if !proton {
+        return Ok(None);
+    }
+    let version = existing_version.unwrap_or_else(|| arcade_core::sources::proton::DEFAULT_VERSION.to_string());
+    let root = arcade_core::proton_dir();
+
+    if arcade_core::sources::proton::is_provisioned(&root, &version) {
+        if metadata::confirm(&format!("Proton build '{version}' is already downloaded — refresh it too?"))? {
+            arcade_core::sources::proton::provision(&root, &version)?;
+        }
+    } else {
+        println!("Fetching Proton ({version})...");
+        arcade_core::sources::proton::provision(&root, &version)?;
+    }
+
+    Ok(Some(version))
 }

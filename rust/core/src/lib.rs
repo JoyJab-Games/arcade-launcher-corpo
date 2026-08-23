@@ -1,8 +1,10 @@
 pub mod game_config;
+pub mod gamescope;
 pub mod http;
 pub mod launch;
 pub mod lock;
 pub mod power;
+pub mod session;
 pub mod sources;
 
 pub use game_config::{GameConfig, GameStore, StoreError};
@@ -43,6 +45,17 @@ pub fn game_dir(name: &str) -> std::path::PathBuf {
 /// points `steamcmd`'s `+force_install_dir` at.
 pub fn game_data_dir(name: &str) -> std::path::PathBuf {
     game_dir(name).join("game_data")
+}
+
+/// Root folder for cached Proton builds (see `sources::proton`) — one
+/// subfolder per Steam AppID, shared across every game that pins that
+/// version, so provisioning one Proton game never re-downloads it for
+/// another. Deliberately separate from `games_dir()`: a Proton build isn't
+/// any one game's own files. Functions in `sources::proton` take this as an
+/// explicit argument rather than reading it themselves, same "explicit
+/// root, testable" shape as `GameStore::open` vs `default_root()`.
+pub fn proton_dir() -> std::path::PathBuf {
+    data_dir().join("proton")
 }
 
 /// Where `SteamCmdSession` keeps `steamcmd`'s own login/session cache.

@@ -18,6 +18,11 @@ pub struct GameLibraryBridge {
 #[godot_api]
 impl IRefCounted for GameLibraryBridge {
     fn init(base: Base<RefCounted>) -> Self {
+        // Tags this launcher's own window as gamescope's base/launcher app
+        // (see arcade_core::gamescope) - once, here, since GameRoster's
+        // autoload construction (`GameLibraryBridge.new()`) only ever runs
+        // once per session. No-op outside a real gamescope session.
+        arcade_core::gamescope::spawn_tag_self_as_launcher();
         Self { base }
     }
 }
@@ -40,7 +45,7 @@ impl GameLibraryBridge {
     /// Spawns `name`'s process (see `arcade_core::launch`). Returns false —
     /// and logs why, via Godot's own error reporting rather than a silent
     /// failure — if it couldn't be started (unknown name, no executable
-    /// resolved, a Proton game, which isn't implemented yet).
+    /// resolved, or its pinned Proton build isn't downloaded yet).
     #[func]
     fn launch_game(&self, name: GString) -> bool {
         let name = name.to_string();
@@ -51,12 +56,20 @@ impl GameLibraryBridge {
         };
 
         match arcade_core::launch(&game) {
-            Ok(_child) => true,
+            Ok(()) => true,
             Err(e) => {
                 godot_error!("GameLibraryBridge: couldn't launch '{name}': {e}");
                 false
             }
         }
+    }
+
+    /// True exactly once per game exit (see `arcade_core::session`) — meant
+    /// to be polled regularly (e.g. from a Screen's `_process()`) while a
+    /// "game is running" screen is active, not called just once.
+    #[func]
+    fn poll_game_exited(&self) -> bool {
+        arcade_core::session::poll_game_exited()
     }
 }
 

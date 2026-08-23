@@ -4,6 +4,9 @@
 [ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_rkjvk"]
 [ext_resource type="PackedScene" uid="uid://bdy3wq77mhpud" path="res://boot/loading_dots.tscn" id="3_smvwk"]
 [ext_resource type="PackedScene" uid="uid://4njkkih41bhv" path="res://ui/logo_lockup.tscn" id="4_logo"]
+[ext_resource type="PackedScene" uid="uid://uh6cxaahew68" path="res://game_library/needs_help_screen.tscn" id="5_needshelp"]
+[ext_resource type="PackedScene" uid="uid://chr3sr7e5iaci" path="res://game_library/game_selection_screen.tscn" id="6_selection"]
+[ext_resource type="PackedScene" path="res://game_session/game_running_screen.tscn" id="7_running"]
 
 [node name="BootScreen" type="Control" unique_id=96447649]
 layout_mode = 3
@@ -13,6 +16,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+needs_help_scene = ExtResource("5_needshelp")
+selection_scene = ExtResource("6_selection")
+game_running_scene = ExtResource("7_running")
 
 [node name="Background" type="Panel" parent="." unique_id=828133452]
 layout_mode = 1

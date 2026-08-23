@@ -14,9 +14,18 @@ func get_released_games() -> Array[Dictionary]:
 	return _bridge.get_released_games()
 
 
-## Starts `name`'s process (see arcade_core::launch). False means it
+## Starts `game_name`'s process (see arcade_core::launch). False means it
 ## couldn't be started (unknown name, no executable resolved, a Proton
 ## game — not implemented yet) — the bridge already logged why via Godot's
 ## own error reporting, so callers only need to react, not explain.
-func launch_game(name: String) -> bool:
-	return _bridge.launch_game(name)
+## Parameter isn't called `name` - that'd shadow Node's own built-in `name`
+## property, since this (like every autoload) extends Node.
+func launch_game(game_name: String) -> bool:
+	return _bridge.launch_game(game_name)
+
+
+## True exactly once per game exit (see arcade_core::session) - meant to be
+## polled regularly (e.g. from GameRunningScreen's _process()) while a game
+## is running, not called just once.
+func poll_game_exited() -> bool:
+	return _bridge.poll_game_exited()

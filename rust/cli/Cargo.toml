@@ -10,3 +10,7 @@ path = "src/main.rs"
 [dependencies]
 arcade-core = { path = "../core" }
 clap = { version = "4", features = ["derive"] }
+# `arcade select`'s multi-toggle release picker (see commands/select.rs) —
+# the only interactive-selector need in this CLI so far that a plain
+# print!/read_line prompt (see install.rs's pick_source) can't cover.
+dialoguer = "0.11"

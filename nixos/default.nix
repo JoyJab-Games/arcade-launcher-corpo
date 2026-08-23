@@ -19,4 +19,9 @@ in
     dev = import ./apps/dev.nix { inherit pkgs; };
     cli = import ./apps/cli.nix { inherit pkgs; };
   };
+  packages.${system} = {
+    default = import ./package.nix { inherit pkgs; };
+    arcade-launcher = import ./package.nix { inherit pkgs; };
+    arcade-cli = import ./cli-package.nix { inherit pkgs; };
+  };
 }

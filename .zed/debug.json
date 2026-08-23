@@ -1,0 +1,15 @@
+[
+  {
+    "adapter": "godot",
+    "label": "Godot (Attach to nix run .#dev)",
+    "request": "attach",
+    "project": "godot"
+  },
+  {
+    "adapter": "godot",
+    "label": "Godot (Launch)",
+    "request": "launch",
+    "project": "godot",
+    "scene": "main"
+  }
+]

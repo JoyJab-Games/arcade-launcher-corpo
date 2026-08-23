@@ -2,6 +2,7 @@ use std::path::Path;
 
 use crate::game_config::GameConfig;
 
+pub mod proton;
 pub mod steam;
 pub mod steamcmd_session;
 
@@ -39,10 +40,19 @@ pub struct GameMetadata {
     pub description: Option<String>,
     pub tags: Vec<String>,
     pub image_url: Option<String>,
-    /// Path to the Linux executable, relative to the game's `game_data/`
-    /// folder — same shape as `GameConfig.exec`, which this fills in
-    /// directly at install/update time.
+    /// Path to the executable, relative to the game's `game_data/` folder —
+    /// same shape as `GameConfig.exec`, which this fills in directly at
+    /// install/update time. The Linux build's path if there is one,
+    /// otherwise the Windows build's (see `proton` below) — never both.
     pub exec: Option<String>,
+    /// `Some(true)` if the source found a Windows build but no Linux one
+    /// (so the game needs Proton), `Some(false)` if it found a native Linux
+    /// build, `None` if it couldn't determine either way (fetch failed,
+    /// schema drift, ...). `None` is distinct from `Some(false)` so
+    /// `arcade update` can fall back to whatever's already on record
+    /// instead of wrongly un-setting Proton on a working game — same
+    /// non-destructive-on-failure convention as `exec`/`description`.
+    pub proton: Option<bool>,
 }
 
 /// One pluggable way to obtain/track games. Per the arcade-launcher

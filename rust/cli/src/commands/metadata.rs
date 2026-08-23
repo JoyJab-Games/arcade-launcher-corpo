@@ -70,6 +70,15 @@ fn extension_of(url: &str) -> &str {
         .unwrap_or("jpg")
 }
 
+/// Yes/no prompt, defaulting to "no" on a blank/unrecognized answer — for
+/// the "you're about to redo a slow step, are you sure" cases (e.g.
+/// re-fetching an already-downloaded Proton build) where staying quiet is
+/// the safer default.
+pub fn confirm(label: &str) -> io::Result<bool> {
+    let typed = prompt(&format!("{label} [y/N]: "))?;
+    Ok(matches!(typed.to_lowercase().as_str(), "y" | "yes"))
+}
+
 fn prompt(label: &str) -> io::Result<String> {
     print!("{label}");
     io::stdout().flush()?;

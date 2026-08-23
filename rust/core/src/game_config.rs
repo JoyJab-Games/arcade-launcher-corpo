@@ -23,6 +23,13 @@ pub struct GameConfig {
     pub exec: Option<String>,
     #[serde(default)]
     pub proton: bool,
+    /// Which Steam Proton build (see `sources::proton`) a `proton` game
+    /// launches through — a label like "Proton Experimental", resolved to
+    /// a concrete Steam AppID and downloaded at install/update time, never
+    /// at launch (see `sources::proton::provision`'s doc comment on why).
+    /// Ignored when `proton` is false.
+    #[serde(default)]
+    pub proton_version: Option<String>,
     #[serde(default)]
     pub prefix_path: Option<String>,
     #[serde(default)]
@@ -190,6 +197,7 @@ mod tests {
             branch: None,
             exec: None,
             proton: false,
+            proton_version: None,
             prefix_path: None,
             released_for_players: false,
             description: None,
