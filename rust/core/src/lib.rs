@@ -1,11 +1,14 @@
 pub mod game_config;
+pub mod http;
+pub mod launch;
 pub mod lock;
 pub mod power;
 pub mod sources;
 
 pub use game_config::{GameConfig, GameStore, StoreError};
+pub use launch::launch;
 pub use lock::ProcessLock;
-pub use sources::{GameSource, ResolvedGame};
+pub use sources::{GameMetadata, GameSource, ResolvedGame};
 
 /// Where per-game config/data lives. Placeholder pending the real
 /// "config storage location/format" decision (arcade-launcher open
@@ -19,8 +22,42 @@ pub fn data_dir() -> std::path::PathBuf {
     std::path::PathBuf::from(home).join(".local/share/arcade-launcher")
 }
 
-/// Where a game's provisioned files live — shared by `arcade install`
-/// (creates it) and `arcade remove` (deletes it), so the two can't drift.
+/// Root folder containing one subfolder per installed game (see `game_dir`).
+/// `GameStore` scans this directly — there is no separate central registry
+/// file, so a game's own folder is the only place its install state lives.
+pub fn games_dir() -> std::path::PathBuf {
+    data_dir().join("games")
+}
+
+/// A single game's own folder: `manifest.json` (its GameConfig), a fetched/
+/// manually-provided preview image, and a `game_data/` subfolder for its
+/// actual provisioned files (see `game_data_dir`) — kept separate from the
+/// two above so a game's own install can't collide with or overwrite them.
+/// Shared by every command that touches a game's files (`install`,
+/// `update`, `remove`), so they can't drift apart from `GameStore`.
 pub fn game_dir(name: &str) -> std::path::PathBuf {
-    data_dir().join("games").join(name)
+    games_dir().join(name)
+}
+
+/// Where a game's actual provisioned files live — e.g. what `arcade install`
+/// points `steamcmd`'s `+force_install_dir` at.
+pub fn game_data_dir(name: &str) -> std::path::PathBuf {
+    game_dir(name).join("game_data")
+}
+
+/// Where `SteamCmdSession` keeps `steamcmd`'s own login/session cache.
+/// Defaults to `$XDG_RUNTIME_DIR` — tmpfs-backed and cleared at
+/// logout/reboot by spec, so a cached Steam login never survives a reboot
+/// without us having to clean anything up ourselves. Falls back to the
+/// system temp dir (e.g. for local dev machines without a runtime dir),
+/// same idea, just without the reboot guarantee. Override via
+/// ARCADE_STEAMCMD_SESSION_DIR for tests/dev.
+pub fn steamcmd_session_dir() -> std::path::PathBuf {
+    if let Ok(dir) = std::env::var("ARCADE_STEAMCMD_SESSION_DIR") {
+        return std::path::PathBuf::from(dir);
+    }
+    let base = std::env::var("XDG_RUNTIME_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::env::temp_dir());
+    base.join("arcade-launcher/steamcmd")
 }

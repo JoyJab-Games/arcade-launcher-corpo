@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://tv2kap76d6or" path="res://boot/boot_screen.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_rkjvk"]
 [ext_resource type="PackedScene" uid="uid://bdy3wq77mhpud" path="res://boot/loading_dots.tscn" id="3_smvwk"]
-[ext_resource type="PackedScene" uid="uid://4njkkih41bhv" path="res://theme/components/logo_lockup.tscn" id="4_logo"]
+[ext_resource type="PackedScene" uid="uid://4njkkih41bhv" path="res://ui/logo_lockup.tscn" id="4_logo"]
 
 [node name="BootScreen" type="Control" unique_id=96447649]
 layout_mode = 3

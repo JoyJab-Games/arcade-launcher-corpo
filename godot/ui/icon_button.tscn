@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://c0s61o6j1r2dr"]
+
+[ext_resource type="Script" uid="uid://bxaj7pd80ahua" path="res://ui/icon_button.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_theme"]
+
+[node name="IconButton" type="PanelContainer" unique_id=1289772101]
+custom_minimum_size = Vector2(220, 72)
+pivot_offset = Vector2(110, 36)
+theme = ExtResource("2_theme")
+theme_type_variation = &"PanelCard"
+script = ExtResource("1_script")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=878834598]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer" unique_id=1395042254]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1556215386]
+unique_name_in_owner = true
+layout_mode = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"LabelPill"
+text = ""

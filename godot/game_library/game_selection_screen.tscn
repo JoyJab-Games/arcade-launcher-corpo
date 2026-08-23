@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://pbt7dewgm6fe" path="res://game_library/game_selection_screen.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://b8yeocoiram6h" path="res://game_library/game_card.tscn" id="2_card"]
 [ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="3_v4cjn"]
+[ext_resource type="PackedScene" uid="uid://dqxhb1x2n5t8w" path="res://ui/hint_bar.tscn" id="4_hintbar"]
+[ext_resource type="PackedScene" uid="uid://c0s61o6j1r2dr" path="res://ui/icon_button.tscn" id="5_iconbtn"]
+[ext_resource type="Texture2D" uid="uid://d0clbje26of8q" path="res://theme/icons/dot_green.png" id="6_gd4er"]
 
 [node name="GameSelectionScreen" type="Control" unique_id=167520431]
 layout_mode = 3
@@ -91,3 +94,13 @@ layout_mode = 2
 
 [node name="GameCard6" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=156567668 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
+
+[node name="HintBar" parent="MarginContainer/VBoxContainer" unique_id=21497045 instance=ExtResource("4_hintbar")]
+
+[node name="IconButton" parent="MarginContainer/VBoxContainer/HintBar" unique_id=1760719938 instance=ExtResource("5_iconbtn")]
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("6_gd4er")
+label_text = "Starten"
+action = &"ui_confirm"

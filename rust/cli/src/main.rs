@@ -14,6 +14,9 @@ enum Command {
     /// Install a game: pick a source, resolve which game, choose a local
     /// reference name.
     Install,
+    /// Re-provision an already-installed game and refresh its tags/preview
+    /// image.
+    Update { name: String },
     /// Remove an installed game.
     Remove { name: String },
     /// List installed games.
@@ -30,10 +33,11 @@ enum Command {
 
 fn main() {
     let cli = Cli::parse();
-    let store = arcade_core::GameStore::open(arcade_core::GameStore::default_path());
+    let store = arcade_core::GameStore::open(arcade_core::GameStore::default_root());
 
     let result = match cli.command {
         Command::Install => commands::install::run(&store),
+        Command::Update { name } => commands::update::run(&store, &name),
         Command::Remove { name } => commands::remove::run(&store, &name),
         Command::List => commands::list::run(&store),
         Command::Release { name } => commands::release::run(&store, &name, true),

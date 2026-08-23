@@ -1,20 +1,14 @@
 use std::error::Error;
 use std::io::{self, Write};
 
-use arcade_core::sources::steam::SteamSource;
 use arcade_core::{GameConfig, GameSource, GameStore, ProcessLock};
 
-/// Registered sources. V1: just Steam. Adding a new source means adding it
-/// here — nothing else about the install flow below changes (see the
-/// GameSource trait / arcade-launcher Phase 1 pitch).
-fn available_sources() -> Vec<Box<dyn GameSource>> {
-    vec![Box::new(SteamSource)]
-}
+use super::metadata;
 
 pub fn run(store: &GameStore) -> Result<(), Box<dyn Error>> {
     let _lock = ProcessLock::acquire(arcade_core::data_dir().join("arcade.lock"))?;
 
-    let sources = available_sources();
+    let sources = super::available_sources();
     let source_idx = if sources.len() == 1 {
         0
     } else {
@@ -24,31 +18,50 @@ pub fn run(store: &GameStore) -> Result<(), Box<dyn Error>> {
 
     let resolved = source.resolve_install_target()?;
 
-    let chosen = prompt(&format!(
-        "Save as which name? [{}]: ",
-        resolved.suggested_name
-    ))?;
-    let name = if chosen.is_empty() {
-        resolved.suggested_name.clone()
-    } else {
-        chosen
-    };
-
-    if store.get(&name)?.is_some() {
-        return Err(format!("a game named '{name}' already exists").into());
+    // Fetched before the name prompt so a source-provided display name
+    // (e.g. Steam's actual game title) can be offered as the default —
+    // note this only affects the prompt's suggestion, never what actually
+    // gets saved as GameConfig.name (see its doc comment: that stays the
+    // admin's own stable choice).
+    let fetched = source.fetch_metadata(&resolved).unwrap_or_default();
+    if let Some(desc) = &fetched.description {
+        println!("{}", desc);
     }
 
-    let dest = arcade_core::game_dir(&name);
+    let suggested_name = fetched.name.clone().unwrap_or_else(|| resolved.suggested_name.clone());
+    let chosen = prompt(&format!("Save as which name? [{suggested_name}]: "))?;
+    let name = if chosen.is_empty() { suggested_name } else { chosen };
+
+    // A folder can exist here with no valid manifest (a leftover from a
+    // previous failed/aborted install) — GameStore treats that the same as
+    // "not installed" (see its doc comment), so only a *valid* existing
+    // manifest is a real conflict worth stopping for.
+    if store.get(&name).is_some() {
+        return Err(format!(
+            "a game named '{name}' already exists — use `arcade update {name}` to refresh it"
+        )
+        .into());
+    }
+
+    let dest = arcade_core::game_data_dir(&name);
     source.provision(&resolved, &dest)?;
 
-    store.add(GameConfig {
+    let game_dir = arcade_core::game_dir(&name);
+    let tags = metadata::resolve_tags(fetched.tags)?;
+    let image_path = metadata::resolve_image(fetched.image_url, &game_dir)?;
+
+    store.save(&GameConfig {
         name: name.clone(),
         source: source.id().to_string(),
         source_ref: resolved.source_ref,
-        exec: None,
+        branch: resolved.branch,
+        exec: fetched.exec,
         proton: false,
         prefix_path: None,
         released_for_players: false,
+        description: fetched.description,
+        tags,
+        image_path,
     })?;
 
     println!("Installed '{name}' (not yet released to players — see `arcade release {name}`).");

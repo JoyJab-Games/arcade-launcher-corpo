@@ -1,5 +1,7 @@
 use godot::prelude::*;
 
+mod game_library;
+
 struct LauncherExtension;
 
 #[gdextension]

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://4njkkih41bhv"]
 
-[ext_resource type="Script" uid="uid://bbbrqieiqb0tr" path="res://theme/components/logo_lockup.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bbbrqieiqb0tr" path="res://ui/logo_lockup.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://cm6lbrk1lfxe8" path="res://theme/branding/logo_color.png" id="2_0myj2"]
 [ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="2_theme"]
 

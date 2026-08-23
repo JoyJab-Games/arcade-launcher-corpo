@@ -3,13 +3,10 @@ use std::error::Error;
 use arcade_core::GameStore;
 
 pub fn run(store: &GameStore, name: &str) -> Result<(), Box<dyn Error>> {
+    // GameStore::remove deletes the game's whole folder (manifest, preview
+    // image, and provisioned files together) in one step — see its doc
+    // comment on why that can't drift apart into two separate deletions.
     store.remove(name)?;
-
-    let dir = arcade_core::game_dir(name);
-    if dir.exists() {
-        std::fs::remove_dir_all(&dir)?;
-    }
-
     println!("Removed '{name}'.");
     Ok(())
 }

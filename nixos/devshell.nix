@@ -13,5 +13,9 @@ pkgs.mkShell {
     rustToolchain
     pkgs.godot_4
     pkgs.cargo-watch
+    # `arcade install`/`update` shell out to this for real Steam depot
+    # downloads (see rust/core/src/sources/steam.rs). Unfree-licensed —
+    # config.allowUnfree is set where `pkgs` is constructed, see default.nix.
+    pkgs.steamcmd
   ];
 }

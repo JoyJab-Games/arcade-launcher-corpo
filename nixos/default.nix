@@ -8,9 +8,15 @@ let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [ rust-overlay.overlays.default ];
+    # steamcmd (rust/core's real Steam download path, see devshell.nix) is
+    # unfree-licensed.
+    config.allowUnfree = true;
   };
 in
 {
   devShells.${system}.default = import ./devshell.nix { inherit pkgs; };
-  apps.${system}.dev = import ./apps.nix { inherit pkgs; };
+  apps.${system} = {
+    dev = import ./apps/dev.nix { inherit pkgs; };
+    cli = import ./apps/cli.nix { inherit pkgs; };
+  };
 }

@@ -345,6 +345,8 @@ shadow_color = Color(0.1804, 0.1412, 0.098, 0.12)
 shadow_size = 2
 shadow_offset = Vector2(0, 1)
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7rx6v"]
+
 [sub_resource type="FontVariation" id="FontVariation_body"]
 base_font = ExtResource("4_hint")
 spacing_bottom = 9
@@ -398,10 +400,10 @@ content_margin_top = 14.0
 content_margin_right = 14.0
 content_margin_bottom = 14.0
 bg_color = Color(1, 0.9765, 0.9373, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
 shadow_color = Color(0.18039216, 0.14117648, 0.09803922, 0.101960786)
 shadow_size = 30
 shadow_offset = Vector2(0, 12)
@@ -500,6 +502,8 @@ ButtonWhite/styles/hover = SubResource("StyleBoxFlat_dyl4s")
 ButtonWhite/styles/hover_pressed = SubResource("StyleBoxFlat_vc3na")
 ButtonWhite/styles/normal = SubResource("StyleBoxFlat_phksx")
 ButtonWhite/styles/pressed = SubResource("StyleBoxFlat_n5x21")
+IconGames/base_type = &"Panel"
+IconGames/styles/panel = SubResource("StyleBoxTexture_7rx6v")
 Label/colors/font_color = Color(0.1804, 0.1412, 0.098, 1)
 Label/constants/line_spacing = 0
 Label/constants/shadow_offset_x = 0

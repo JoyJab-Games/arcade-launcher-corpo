@@ -13,14 +13,14 @@ extends RefCounted
 
 const CONFIRM := &"ui_confirm" # A, btn_green — confirm / start / type a character
 const BACK := &"ui_back" # B, btn_red — back; tap = delete in text entry
-const SUBMIT := &"ui_submit" # X, btn_blue — connect / submit
+const SUBMIT := &"ui_submit" # Y, btn_blue — connect / submit
 const PAGE_PREV := &"ui_page_prev" # LB, btn_white — previous page/group
 const PAGE_NEXT := &"ui_page_next" # RB, btn_white — next page/group
 const OVERVIEW := &"ui_overview" # Home — open/close in-game overview
 
 
 ## Wires "confirm" activation for a composite Control-based component (a
-## GameCard, ListRow, KeyCap, ...) that isn't a Button and so gets no
+## GameCard, ListRow, ...) that isn't a Button and so gets no
 ## built-in press behavior. While `control` holds focus, a ui_confirm press
 ## calls `callback`. One line from the component's _ready() — see
 ## GameCard._ready() for the reference use.

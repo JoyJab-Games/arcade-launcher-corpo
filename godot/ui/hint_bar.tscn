@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://dqxhb1x2n5t8w"]
+
+[node name="HintBar" type="HBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_vertical = 0
+theme_override_constants/separation = 26
+alignment = 1

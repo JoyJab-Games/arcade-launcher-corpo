@@ -1,6 +1,10 @@
 # Rust build artifacts
 /rust/target/
 
+# Project-local dev data dir (installed games/settings), used by
+# `nix run .#dev` and `nix run .#cli` — see nixos/apps/dev.nix
+/.data/
+
 # Nix build results
 /result
 /result-*
