@@ -55,24 +55,19 @@ Concretely, on that branch:
   `arcade-launcher` crashes. Only the Nix-level configuration (does it
   evaluate, does it build) is confirmed.
 - **No PR opened yet** — branch exists and is pushed, that's it.
-- **Test without physical hardware, before trusting this blind on the
-  cabinet:** gamescope has a genuine nested mode (runs as an ordinary
-  Wayland client inside any other compositor — this is how people test
-  gamescope under GNOME/Sway on a normal desktop already). So:
-  ```
-  gamescope --steam -- ${arcade-launcher}/bin/arcade-launcher
-  ```
-  run from an already-logged-in desktop session should exercise the
-  *entire* gamescope integration (window tagging, baselayer focus swap on
-  launch/exit) for real, without touching `greetd`/embedded
-  mode/actual display hardware at all — embedded vs. nested only changes
-  who owns DRM/KMS, not the X11-atom control protocol
-  `arcade-launcher-corpo`'s `gamescope.rs` talks to. Worth adding to
-  `arcade-launcher-corpo` as a `nix run .#dev-gamescope`-style app (same
-  shape as `apps/dev.nix`, wrapping the built package or the editor in a
-  nested `gamescope --` invocation — add `pkgs.gamescope` to
-  `nixos/devshell.nix` first). Do this *before* debugging on the cabinet
-  itself if the real thing doesn't work first try.
+- **Nested-gamescope local testing is built (`nix run .#dev-gamescope` in
+  `arcade-launcher-corpo`) but confirmed broken under Hyprland
+  specifically** — not a flag issue, a real unresolved upstream gamescope
+  bug. Confirmed by hand: even with `--backend wayland` forced (not the
+  default `auto`, which was actually picking `headless` - no window at
+  all), gamescope's nested window never registers with Hyprland at
+  all — checked via both `hyprctl clients` and `hyprctl layers`, neither
+  shows it. See https://github.com/ValveSoftware/gamescope/issues/1707
+  and related issues (nested gamescope under wlroots/tiling compositors,
+  Hyprland specifically called out) - no known fix as of writing. If
+  you're not on Hyprland this may just work; if you are, this path is
+  currently a dead end and real-hardware testing via `arcade-os` is the
+  only way to actually exercise the compositor integration for now.
 - No crash-vs-clean-exit distinction yet in `arcade_core::launch` (a
   crashed game and a normal quit look identical to the launcher).
 - `arcade-os`'s `configs/steam-boot.nix` still looks like dead/orphaned

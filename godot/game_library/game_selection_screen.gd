@@ -48,9 +48,13 @@ func _rebuild_cards(games: Array[Dictionary]) -> void:
 	for game in games:
 		var card := card_scene.instantiate() as GameCard
 		assert(card != null, "GameSelectionScreen: card_scene root must extend GameCard")
+		# add_child() before set_game(): a card's @onready vars (its own
+		# %TitleLabel etc.) only populate once it's actually entered the
+		# tree - calling set_game() on a still-detached instance hits them
+		# while still null.
+		card_container.add_child(card)
 		card.set_game(game)
 		card.activated.connect(game_selected.emit.bind(game))
-		card_container.add_child(card)
 		_cards.append(card)
 
 	if not _cards.is_empty():
