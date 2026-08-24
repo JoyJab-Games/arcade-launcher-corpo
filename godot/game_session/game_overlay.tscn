@@ -1,0 +1,110 @@
+[gd_scene format=3 uid="uid://cawqtbcu3h4qa"]
+
+[ext_resource type="Theme" uid="uid://7dkyorn0nyrv" path="res://theme/default_theme.tres" id="1_sgir3"]
+[ext_resource type="PackedScene" uid="uid://c0s61o6j1r2dr" path="res://ui/icon_button.tscn" id="2_su1bx"]
+[ext_resource type="Texture2D" uid="uid://d0clbje26of8q" path="res://theme/icons/dot_green.png" id="3_rqj3h"]
+[ext_resource type="Texture2D" uid="uid://0red3gvcysud" path="res://theme/icons/dot_red.png" id="4_ckyf3"]
+
+[node name="GameOverlay" type="Control" unique_id=1564541836]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlurAndGreyBackground" type="Control" parent="." unique_id=37572811]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -1.0
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1829449465]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -193.0
+offset_top = -151.0
+offset_right = 191.0
+offset_bottom = 128.0
+theme = ExtResource("1_sgir3")
+theme_type_variation = &"LargeContainer"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=395163901]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=554899937]
+layout_mode = 2
+theme_type_variation = &"LabelMicro"
+text = "läuft: Wummsen Village"
+uppercase = true
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer" unique_id=512187885]
+layout_mode = 2
+theme_type_variation = &"LabelTitle"
+text = "Pause"
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=1199033458]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer" unique_id=357032360]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer/HBoxContainer" unique_id=1858203460]
+layout_mode = 2
+theme_type_variation = &"LabelPill"
+text = "Spiel Beenden"
+
+[node name="PanelContainer2" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=148891051]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer2" unique_id=975518767]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer" unique_id=53086811]
+layout_mode = 2
+theme_type_variation = &"LabelPill"
+text = "Herunterfahren"
+
+[node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=816283056]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3" unique_id=42599390]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer" unique_id=167186048]
+layout_mode = 2
+theme_type_variation = &"LabelPill"
+text = "Neustart"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=395602962]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -128.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="IconButton" parent="HBoxContainer" unique_id=1289772101 instance=ExtResource("2_su1bx")]
+layout_mode = 2
+mouse_filter = 2
+icon = ExtResource("3_rqj3h")
+label_text = "Auswählen"
+action = &"ui_confirm"
+
+[node name="IconButton2" parent="HBoxContainer" unique_id=2108548812 instance=ExtResource("2_su1bx")]
+layout_mode = 2
+mouse_filter = 2
+icon = ExtResource("4_ckyf3")
+label_text = "Zurück ins Spiel"
+action = &"ui_confirm"
