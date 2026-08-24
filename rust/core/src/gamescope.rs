@@ -87,6 +87,27 @@ pub fn spawn_tag_self_as_launcher() {
     std::thread::spawn(tag_self_as_launcher);
 }
 
+/// Switches gamescope's focus to the launcher window — used both when a
+/// game exits (see `spawn_monitor_and_focus`) and when the in-game
+/// overlay opens (see `GameOverlay.enter()` on the Godot side, via
+/// `GameLibraryBridge::focus_launcher`).
+pub fn focus_launcher() {
+    let Some(gamescope) = primary() else { return };
+    let _ = gamescope.set_baselayer_app_id(LAUNCHER_APP_ID);
+}
+
+/// Switches gamescope's focus back to the running game — used when the
+/// in-game overlay closes (see `GameOverlay.exit()`). Only meaningful
+/// while a game is actually running and already tagged by
+/// `spawn_monitor_and_focus`; calling this with nothing running just
+/// re-focuses an app-id nothing currently owns, which is harmless (and
+/// not this function's job to guard against — `session::stop_game`/
+/// `poll_game_exited` are what track whether a game is actually up).
+pub fn focus_game() {
+    let Some(gamescope) = primary() else { return };
+    let _ = gamescope.set_baselayer_app_id(GAME_APP_ID);
+}
+
 /// Hands gamescope focus to `child`'s window once it appears, waits for
 /// `child` to exit (notifying `session::notify_game_exited` the moment it
 /// does, so the front-end can leave its "game is running" screen), then
@@ -106,15 +127,16 @@ pub fn spawn_monitor_and_focus(mut child: Child) {
             }
         }
 
+        crate::session::set_current_pid(Some(child.id()));
+
         // Best-effort either way: an error here just means we can't tell
         // when the game exited, not that anything about the game itself
         // is wrong — it's already running independently of this thread.
         let _ = child.wait();
-        crate::session::notify_game_exited();
 
-        if let Some(gamescope) = primary() {
-            let _ = gamescope.set_baselayer_app_id(LAUNCHER_APP_ID);
-        }
+        crate::session::set_current_pid(None);
+        crate::session::notify_game_exited();
+        focus_launcher();
     });
 }
 

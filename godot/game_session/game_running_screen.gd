@@ -12,20 +12,45 @@
 ## screen isn't the active one (see its _deactivate), so there's no
 ## wasted polling once a game's actually left this screen. The moment an
 ## exit is detected, asks FrontFlow to resolve() again, same as Boot does
-## on cold start - so the library reflects whatever's actually released
-## now, not whatever it was when this game launched.
+## on cold start (but never auto-launching straight back into the same
+## single game - see resolve()'s auto_launch_single_game - a player who
+## just quit shouldn't be confused by it immediately reopening) - so the
+## library reflects whatever's actually released now, not whatever it was
+## when this game launched.
+##
+## Also listens for ui_overview (Home) to open GameOverlay on top of the
+## game - see GameAction.OVERVIEW's own doc comment ("open/close in-game
+## overview").
 class_name GameRunningScreen
 extends Screen
 
 ## Scenes FrontFlow re-resolves through once the running game exits - same
 ## shape as BootScreen's own needs_help_scene/selection_scene/
-## game_running_scene exports (this screen included, for the case where
-## resolve() decides to auto-launch straight into another game).
+## game_running_scene/game_overlay_scene exports (this screen included,
+## for the case where resolve() decides to auto-launch straight into
+## another game).
 @export var needs_help_scene: PackedScene
 @export var selection_scene: PackedScene
 @export var game_running_scene: PackedScene
+@export var game_overlay_scene: PackedScene
 
 
 func _process(_delta: float) -> void:
 	if GameRoster.poll_game_exited():
-		FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene)
+		FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene, game_overlay_scene, false)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(GameAction.OVERVIEW):
+		get_viewport().set_input_as_handled()
+		_open_overlay()
+	else:
+		super._unhandled_input(event)
+
+
+func _open_overlay() -> void:
+	var overlay := ScreenRouter.push(game_overlay_scene) as GameOverlay
+	overlay.needs_help_scene = needs_help_scene
+	overlay.selection_scene = selection_scene
+	overlay.game_running_scene = game_running_scene
+	overlay.game_overlay_scene = game_overlay_scene

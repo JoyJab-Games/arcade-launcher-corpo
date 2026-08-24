@@ -6,10 +6,12 @@
 //! `launch` (spawning the process) and `gamescope` (compositor-level
 //! focus) — this is purely "does the front-end need to react to a game
 //! having ended", nothing about *how* the game runs or is displayed.
+use std::process::Command;
 use std::sync::mpsc::{self, Receiver, SyncSender};
 use std::sync::{Mutex, OnceLock};
 
 static CHANNEL: OnceLock<(SyncSender<()>, Mutex<Receiver<()>>)> = OnceLock::new();
+static CURRENT_PID: Mutex<Option<u32>> = Mutex::new(None);
 
 fn channel() -> &'static (SyncSender<()>, Mutex<Receiver<()>>) {
     CHANNEL.get_or_init(|| {
@@ -42,6 +44,28 @@ pub fn poll_game_exited() -> bool {
     rx.lock().expect("exit channel mutex shouldn't be poisoned").try_recv().is_ok()
 }
 
+/// Records which process is the currently running game (or clears it,
+/// `None`) — see `gamescope::spawn_monitor_and_focus`, the only caller,
+/// which already tracks the child's lifetime for its own focus-handback
+/// purposes. Exists so `stop_game` has something to act on without
+/// needing ownership of the actual `Child` (which
+/// `spawn_monitor_and_focus`'s own thread already owns, to `wait()` on).
+pub(crate) fn set_current_pid(pid: Option<u32>) {
+    *CURRENT_PID.lock().expect("current-pid mutex shouldn't be poisoned") = pid;
+}
+
+/// Asks the currently running game to quit — SIGTERM, not SIGKILL, so it
+/// gets a chance to save state, same as closing it normally would. False
+/// if there's no game running right now (nothing to stop) or the signal
+/// couldn't be sent; either way, `poll_game_exited` is still what tells
+/// the front-end the game has actually gone, this only asks.
+pub fn stop_game() -> bool {
+    let Some(pid) = *CURRENT_PID.lock().expect("current-pid mutex shouldn't be poisoned") else {
+        return false;
+    };
+    Command::new("kill").arg("-TERM").arg(pid.to_string()).status().is_ok_and(|status| status.success())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -68,5 +92,19 @@ mod tests {
         notify_game_exited();
         assert!(poll_game_exited(), "a second notification before polling is dropped, not queued");
         assert!(!poll_game_exited());
+    }
+
+    #[test]
+    fn stop_game_asks_the_tracked_pid_to_terminate() {
+        let mut child = Command::new("sleep").arg("30").spawn().expect("'sleep' should exist on any Unix system");
+        set_current_pid(Some(child.id()));
+
+        assert!(stop_game(), "should report success sending SIGTERM to a real running process");
+
+        let status = child.wait().expect("child should exit once signalled");
+        assert!(!status.success(), "SIGTERM should end it, not a clean exit");
+
+        set_current_pid(None);
+        assert!(!stop_game(), "false once nothing is tracked as running");
     }
 }

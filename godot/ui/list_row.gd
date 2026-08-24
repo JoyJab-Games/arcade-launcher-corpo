@@ -1,7 +1,16 @@
+## A focusable, stylable menu row - attach directly to whatever
+## PanelContainer needs it (game_overlay.tscn's action items are the
+## first use), no separate scene of its own. Focus styling and activation
+## are split the same way GameCard splits them: this owns the visuals,
+## `activated` is a plain signal the parent reacts to.
 extends PanelContainer
+
+## Emitted when this row is activated (GameAction.CONFIRM while focused).
+signal activated
 
 func _ready():
 	focus_mode = FOCUS_ALL
+	GameAction.setup_confirm(self, func(): activated.emit())
 
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color("#FFFFFF")

@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://uh6cxaahew68" path="res://game_library/needs_help_screen.tscn" id="5_needshelp"]
 [ext_resource type="PackedScene" uid="uid://chr3sr7e5iaci" path="res://game_library/game_selection_screen.tscn" id="6_selection"]
 [ext_resource type="PackedScene" path="res://game_session/game_running_screen.tscn" id="7_running"]
+[ext_resource type="PackedScene" uid="uid://cawqtbcu3h4qa" path="res://game_session/game_overlay.tscn" id="8_overlay"]
 
 [node name="BootScreen" type="Control" unique_id=96447649]
 layout_mode = 3
@@ -19,6 +20,7 @@ script = ExtResource("1_script")
 needs_help_scene = ExtResource("5_needshelp")
 selection_scene = ExtResource("6_selection")
 game_running_scene = ExtResource("7_running")
+game_overlay_scene = ExtResource("8_overlay")
 
 [node name="Background" type="Panel" parent="." unique_id=828133452]
 layout_mode = 1

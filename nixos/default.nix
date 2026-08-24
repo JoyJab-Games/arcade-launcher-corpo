@@ -17,6 +17,7 @@ in
   devShells.${system}.default = import ./devshell.nix { inherit pkgs; };
   apps.${system} = {
     dev = import ./apps/dev.nix { inherit pkgs; };
+    dev-gamescope = import ./apps/dev-gamescope.nix { inherit pkgs; };
     cli = import ./apps/cli.nix { inherit pkgs; };
   };
   packages.${system} = {

@@ -19,6 +19,7 @@ extends Screen
 @export var needs_help_scene: PackedScene
 @export var selection_scene: PackedScene
 @export var game_running_scene: PackedScene
+@export var game_overlay_scene: PackedScene
 
 var _timer: Timer
 
@@ -45,4 +46,4 @@ func _on_admin_shortcut_during_boot() -> void:
 
 func _on_boot_window_elapsed() -> void:
 	print("boot window elapsed")
-	FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene)
+	FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene, game_overlay_scene)

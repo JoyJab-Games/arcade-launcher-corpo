@@ -18,5 +18,10 @@ pkgs.mkShell {
     # a build `arcade install`/`update` predownloaded via steamcmd) to
     # launch Proton/Windows games — see rust/core/src/launch.rs.
     pkgs.umu-launcher
+    # For manually testing the gamescope compositor integration
+    # (rust/core/src/gamescope.rs) nested inside a normal desktop session —
+    # see apps/dev-gamescope.nix, which wraps this for you; kept here too
+    # for ad-hoc `gamescope -- ...` use.
+    pkgs.gamescope
   ];
 }

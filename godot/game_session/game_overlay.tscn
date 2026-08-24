@@ -4,6 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://c0s61o6j1r2dr" path="res://ui/icon_button.tscn" id="2_su1bx"]
 [ext_resource type="Texture2D" uid="uid://d0clbje26of8q" path="res://theme/icons/dot_green.png" id="3_rqj3h"]
 [ext_resource type="Texture2D" uid="uid://0red3gvcysud" path="res://theme/icons/dot_red.png" id="4_ckyf3"]
+[ext_resource type="Script" path="res://game_session/game_overlay.gd" id="5_script"]
+[ext_resource type="Script" path="res://ui/list_row.gd" id="6_listrow"]
 
 [node name="GameOverlay" type="Control" unique_id=1564541836]
 layout_mode = 3
@@ -12,6 +14,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("5_script")
 
 [node name="BlurAndGreyBackground" type="Control" parent="." unique_id=37572811]
 layout_mode = 1
@@ -48,35 +51,41 @@ layout_mode = 2
 theme_type_variation = &"LabelTitle"
 text = "Pause"
 
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=1199033458]
+[node name="QuitButton" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=1199033458]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("6_listrow")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/QuitButton" unique_id=357032360]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer" unique_id=357032360]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer/HBoxContainer" unique_id=1858203460]
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/QuitButton/HBoxContainer" unique_id=1858203460]
 layout_mode = 2
 theme_type_variation = &"LabelPill"
 text = "Spiel Beenden"
 
-[node name="PanelContainer2" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=148891051]
+[node name="ShutdownButton" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=148891051]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("6_listrow")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ShutdownButton" unique_id=975518767]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer2" unique_id=975518767]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer" unique_id=53086811]
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/ShutdownButton/HBoxContainer" unique_id=53086811]
 layout_mode = 2
 theme_type_variation = &"LabelPill"
 text = "Herunterfahren"
 
-[node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=816283056]
+[node name="RestartButton" type="PanelContainer" parent="PanelContainer/VBoxContainer" unique_id=816283056]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("6_listrow")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/RestartButton" unique_id=42599390]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3" unique_id=42599390]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer" unique_id=167186048]
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/RestartButton/HBoxContainer" unique_id=167186048]
 layout_mode = 2
 theme_type_variation = &"LabelPill"
 text = "Neustart"
@@ -107,4 +116,4 @@ layout_mode = 2
 mouse_filter = 2
 icon = ExtResource("4_ckyf3")
 label_text = "Zurück ins Spiel"
-action = &"ui_confirm"
+action = &"ui_back"

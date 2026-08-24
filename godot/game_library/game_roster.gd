@@ -29,3 +29,29 @@ func launch_game(game_name: String) -> bool:
 ## is running, not called just once.
 func poll_game_exited() -> bool:
 	return _bridge.poll_game_exited()
+
+
+## Switches gamescope's compositor focus to the launcher, so it's actually
+## visible over the running game - see GameOverlay.enter().
+func focus_launcher() -> void:
+	_bridge.focus_launcher()
+
+
+## Switches gamescope's compositor focus back to the running game - see
+## GameOverlay.exit().
+func focus_game() -> void:
+	_bridge.focus_game()
+
+
+## Asks the currently running game to quit. False if none is running -
+## poll_game_exited() is still what confirms it actually has.
+func stop_game() -> bool:
+	return _bridge.stop_game()
+
+
+func shutdown() -> bool:
+	return _bridge.shutdown()
+
+
+func reboot() -> bool:
+	return _bridge.reboot()

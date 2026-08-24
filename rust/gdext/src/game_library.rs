@@ -71,6 +71,54 @@ impl GameLibraryBridge {
     fn poll_game_exited(&self) -> bool {
         arcade_core::session::poll_game_exited()
     }
+
+    /// Switches gamescope's compositor focus to the launcher (see
+    /// `arcade_core::gamescope::focus_launcher`) — called when the in-game
+    /// overlay opens, so it's actually visible over the running game.
+    #[func]
+    fn focus_launcher(&self) {
+        arcade_core::gamescope::focus_launcher();
+    }
+
+    /// Switches gamescope's compositor focus back to the running game (see
+    /// `arcade_core::gamescope::focus_game`) — called when the in-game
+    /// overlay closes.
+    #[func]
+    fn focus_game(&self) {
+        arcade_core::gamescope::focus_game();
+    }
+
+    /// Asks the currently running game to quit (see
+    /// `arcade_core::session::stop_game`) — false if none is running.
+    /// `poll_game_exited` is still what confirms it actually has.
+    #[func]
+    fn stop_game(&self) -> bool {
+        arcade_core::session::stop_game()
+    }
+
+    /// Powers the device off (see `arcade_core::power::shutdown`).
+    #[func]
+    fn shutdown(&self) -> bool {
+        match arcade_core::power::shutdown() {
+            Ok(()) => true,
+            Err(e) => {
+                godot_error!("GameLibraryBridge: couldn't shut down: {e}");
+                false
+            }
+        }
+    }
+
+    /// Reboots the device (see `arcade_core::power::reboot`).
+    #[func]
+    fn reboot(&self) -> bool {
+        match arcade_core::power::reboot() {
+            Ok(()) => true,
+            Err(e) => {
+                godot_error!("GameLibraryBridge: couldn't reboot: {e}");
+                false
+            }
+        }
+    }
 }
 
 fn game_to_dictionary(game: &GameConfig) -> VarDictionary {
