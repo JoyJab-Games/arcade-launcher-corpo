@@ -6,14 +6,37 @@
 //! own gamescope-session — arcade-launcher's compositor choice follows
 //! that prior art directly) rather than hand-rolling X11 atom manipulation.
 //!
-//! Every window gamescope manages carries a `STEAM_GAME` X11 property (an
-//! arbitrary app-id number despite the Steam-flavored name — gamescope's
-//! generic "which logical app owns this window" tag). Setting
-//! `GAMESCOPECTRL_BASELAYER_APPID` on gamescope's root window is what
-//! actually switches which app-id is shown/focused. So: tag this
-//! launcher's own window with LAUNCHER_APP_ID once at startup, tag a
-//! freshly-launched game's window with GAME_APP_ID once it appears, and
-//! flip the baselayer between the two on launch and on exit.
+//! Two distinct mechanisms live here, for two distinct kinds of handover:
+//!
+//! - **Full switch** (`focus_launcher`/`focus_game`): every window
+//!   gamescope manages carries a `STEAM_GAME` X11 property (an arbitrary
+//!   app-id number despite the Steam-flavored name — gamescope's generic
+//!   "which logical app owns this window" tag). Setting
+//!   `GAMESCOPECTRL_BASELAYER_APPID` on gamescope's root window is what
+//!   actually switches which app-id is shown/focused — only one of
+//!   launcher/game is ever visible at a time. Used everywhere right now:
+//!   the real launch/exit handover, and (for now) `GameOverlay` too - tag
+//!   this launcher's own window with LAUNCHER_APP_ID once at startup, tag
+//!   a freshly-launched game's window with GAME_APP_ID once it appears,
+//!   and flip the baselayer between the two on launch, on exit, and on
+//!   `GameOverlay` open/close.
+//! - **Simultaneous overlay** (`enter_overlay`/`exit_overlay`): the game
+//!   stays gamescope's visible baselayer the whole time — this never
+//!   touches the baselayer at all. Instead this launcher's own window —
+//!   transparent per-pixel (see `project.godot`) — is composited on top
+//!   of it by tagging it as gamescope's `STEAM_OVERLAY` window and
+//!   toggling `STEAM_INPUT_FOCUS` between it and the game. Built and
+//!   tested, but **currently unused/parked**, not wired to
+//!   `GameOverlay`: keyboard/mouse would correctly retarget via
+//!   `STEAM_INPUT_FOCUS`, but gamepad input on Linux mostly bypasses
+//!   window focus entirely (raw evdev reads, same reason `input_watch`
+//!   exists at all) - without something InputPlumber-equivalent gating
+//!   the physical gamepad between launcher and game, a player navigating
+//!   this overlay with a controller would also be driving the
+//!   still-visibly-running game underneath it at the same time. Revisit
+//!   once that's built; until then `focus_launcher`/`focus_game` is what
+//!   actually backs `GameOverlay`, since fully backgrounding the game
+//!   sidesteps the problem instead of needing to solve it.
 //!
 //! Best-effort throughout, not a hard requirement: outside a real
 //! gamescope session (e.g. `nix run .#dev` on a plain desktop) every
@@ -89,7 +112,7 @@ pub fn spawn_tag_self_as_launcher() {
 
 /// Switches gamescope's focus to the launcher window — used both when a
 /// game exits (see `spawn_monitor_and_focus`) and when the in-game
-/// overlay opens (see `GameOverlay.enter()` on the Godot side, via
+/// overview opens (see `GameOverlay.enter()`, via
 /// `GameLibraryBridge::focus_launcher`).
 pub fn focus_launcher() {
     let Some(gamescope) = primary() else { return };
@@ -97,7 +120,7 @@ pub fn focus_launcher() {
 }
 
 /// Switches gamescope's focus back to the running game — used when the
-/// in-game overlay closes (see `GameOverlay.exit()`). Only meaningful
+/// in-game overview closes (see `GameOverlay.exit()`). Only meaningful
 /// while a game is actually running and already tagged by
 /// `spawn_monitor_and_focus`; calling this with nothing running just
 /// re-focuses an app-id nothing currently owns, which is harmless (and
@@ -140,6 +163,52 @@ pub fn spawn_monitor_and_focus(mut child: Child) {
     });
 }
 
+/// Switches to true simultaneous overlay compositing: unlike
+/// `focus_launcher`, this never touches `baselayer_app_id`, so the
+/// running game stays gamescope's visible baselayer throughout. Instead
+/// this launcher's own window is marked as gamescope's overlay window and
+/// given input focus, so it's composited on top of the still-rendering
+/// game and receives keyboard/mouse input instead of it. **Currently
+/// unused/parked** — see module doc for why (gamepad input isn't actually
+/// gated by this) — not called by `GameOverlay` right now, but kept
+/// working and exposed via `GameLibraryBridge::enter_overlay` for when
+/// that's solved.
+pub fn enter_overlay() {
+    let Some(gamescope) = primary() else { return };
+    set_overlay_state(&gamescope, true);
+}
+
+/// Reverses `enter_overlay` — input goes back to the game, and this
+/// launcher's window stops claiming to be the overlay. Same "parked" note
+/// as `enter_overlay` applies.
+pub fn exit_overlay() {
+    let Some(gamescope) = primary() else { return };
+    set_overlay_state(&gamescope, false);
+}
+
+/// Shared by `enter_overlay`/`exit_overlay`: `showing` toggles this
+/// launcher's own window(s) between "the overlay, with input focus" and
+/// neither — and the running game's window(s) the opposite way, if a game
+/// is currently tracked (see `session::current_pid`). Re-discovers both
+/// sets of windows on every call rather than caching them: this only ever
+/// runs on a real UI action (opening/closing the overlay), never
+/// per-frame, so the extra round trip is free, and it sidesteps ever
+/// acting on a stale window id from a game that's since restarted.
+fn set_overlay_state(gamescope: &XWayland, showing: bool) {
+    let value = u32::from(showing);
+    let launcher_windows = gamescope.get_windows_for_pid(std::process::id()).unwrap_or_default();
+    for window in &launcher_windows {
+        let _ = gamescope.set_overlay(*window, value);
+        let _ = gamescope.set_input_focus(*window, value);
+    }
+
+    let Some(game_pid) = crate::session::current_pid() else { return };
+    let game_windows = gamescope.get_windows_for_pid(game_pid).unwrap_or_default();
+    for window in &game_windows {
+        let _ = gamescope.set_input_focus(*window, u32::from(!showing));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -169,5 +238,11 @@ mod tests {
         // child.wait() confirms exit-detection works even without
         // gamescope, but there's nothing externally observable to check
         // from here without a real compositor to query.
+    }
+
+    #[test]
+    fn enter_and_exit_overlay_do_not_panic_outside_a_gamescope_session() {
+        enter_overlay();
+        exit_overlay();
     }
 }

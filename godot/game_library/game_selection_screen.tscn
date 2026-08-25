@@ -63,43 +63,56 @@ theme = ExtResource("3_v4cjn")
 theme_type_variation = &"LabelDisplay"
 text = "Spiele"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=1822640506]
-unique_name_in_owner = true
+[node name="ClipOffset" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=941879805]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/margin_left = -50
+theme_override_constants/margin_top = -50
+theme_override_constants/margin_right = -50
+theme_override_constants/margin_bottom = -50
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/ClipOffset" unique_id=1822640506]
+unique_name_in_owner = true
+layout_mode = 2
 follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="CardContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=2123222179]
+[node name="ClipInset" type="MarginContainer" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer" unique_id=1088211652]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="CardContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset" unique_id=2123222179]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 40
 theme_override_constants/v_separation = 40
 columns = 4
 
-[node name="GameCard" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=1780414189 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=1780414189 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
-[node name="GameCard2" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=623022853 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard2" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=623022853 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
-[node name="GameCard3" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=973367393 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard3" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=973367393 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
-[node name="GameCard4" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=169295860 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard4" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=169295860 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
-[node name="GameCard5" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=2013547865 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard5" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=2013547865 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
-[node name="GameCard6" parent="MarginContainer/VBoxContainer/ScrollContainer/CardContainer" unique_id=156567668 instance_placeholder="res://game_library/game_card.tscn"]
+[node name="GameCard6" parent="MarginContainer/VBoxContainer/ClipOffset/ScrollContainer/ClipInset/CardContainer" unique_id=156567668 instance_placeholder="res://game_library/game_card.tscn"]
 layout_mode = 2
 
 [node name="HintBar" parent="MarginContainer/VBoxContainer" unique_id=21497045 instance=ExtResource("4_hintbar")]
 
 [node name="IconButton" parent="MarginContainer/VBoxContainer/HintBar" unique_id=1760719938 instance=ExtResource("5_iconbtn")]
 layout_mode = 2
-focus_mode = 0
 mouse_filter = 2
 icon = ExtResource("6_gd4er")
 label_text = "Starten"

@@ -1,12 +1,18 @@
 ## Pause-style overlay shown on top of a running game (see
 ## GameRunningScreen, which pushes this on a ui_overview/Home press).
-## Gamescope keeps the game itself running the whole time underneath (see
-## arcade_core::gamescope) - enter()/exit() just swap which one gamescope
-## actually shows: this launcher while the overlay is open, the game again
-## once it closes. GameAction.BACK (B) already closes it for free, via
-## Screen's own default handling; ui_overview does too (see
-## _unhandled_input), matching its "open/close in-game overview" doc
-## comment in GameAction.
+## enter()/exit() do a full gamescope baselayer switch (see
+## arcade_core::gamescope::focus_launcher/focus_game) - the game keeps
+## running the whole time, fully backgrounded rather than visible behind
+## this. A true simultaneous-overlay mode exists too
+## (arcade_core::gamescope::enter_overlay/exit_overlay) but is parked:
+## gamepad input on Linux mostly bypasses window focus entirely, so
+## without something InputPlumber-equivalent to gate the physical
+## controller between this menu and the still-visibly-running game, using
+## it here would mean navigating this menu also drives the game
+## underneath at the same time. Revisit once that's built. GameAction.BACK
+## (B) already closes it for free, via Screen's own default handling;
+## ui_overview does too (see _unhandled_input), matching its "open/close
+## in-game overview" doc comment in GameAction.
 ##
 ## Also keeps polling for the game exiting on its own (crashing, or "Spiel
 ## Beenden" below) while showing - ScreenRouter pauses GameRunningScreen's

@@ -20,7 +20,13 @@
 ##
 ## Also listens for ui_overview (Home) to open GameOverlay on top of the
 ## game - see GameAction.OVERVIEW's own doc comment ("open/close in-game
-## overview").
+## overview"). That only fires while this launcher's own window actually
+## has input focus though, which it doesn't once a game is running and
+## holds it instead - so this also polls
+## GameRoster.poll_overview_requested() once per frame (see
+## arcade_core::input_watch), the evdev-level fallback that catches the
+## same button press regardless of which window the compositor currently
+## favors.
 class_name GameRunningScreen
 extends Screen
 
@@ -38,6 +44,9 @@ extends Screen
 func _process(_delta: float) -> void:
 	if GameRoster.poll_game_exited():
 		FrontFlow.resolve(needs_help_scene, selection_scene, game_running_scene, game_overlay_scene, false)
+		return
+	if GameRoster.poll_overview_requested():
+		_open_overlay()
 
 
 func _unhandled_input(event: InputEvent) -> void:

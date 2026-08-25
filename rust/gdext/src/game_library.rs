@@ -23,6 +23,11 @@ impl IRefCounted for GameLibraryBridge {
         // autoload construction (`GameLibraryBridge.new()`) only ever runs
         // once per session. No-op outside a real gamescope session.
         arcade_core::gamescope::spawn_tag_self_as_launcher();
+        // Starts the evdev overview-button watcher (see
+        // arcade_core::input_watch) - same "once per session" reasoning.
+        // Harmless if no matching device is present (e.g. a dev machine
+        // with no gamepad plugged in).
+        arcade_core::input_watch::spawn_watch();
         Self { base }
     }
 }
@@ -72,6 +77,17 @@ impl GameLibraryBridge {
         arcade_core::session::poll_game_exited()
     }
 
+    /// True exactly once per "open the in-game overview" request detected
+    /// by the evdev button watcher (see `arcade_core::input_watch`) while
+    /// a game is running and holds normal input focus away from this
+    /// launcher's own window. Meant to be polled regularly (e.g. from
+    /// `GameRunningScreen`'s `_process()`), same shape as
+    /// `poll_game_exited`.
+    #[func]
+    fn poll_overview_requested(&self) -> bool {
+        arcade_core::session::poll_overview_requested()
+    }
+
     /// Switches gamescope's compositor focus to the launcher (see
     /// `arcade_core::gamescope::focus_launcher`) — called when the in-game
     /// overlay opens, so it's actually visible over the running game.
@@ -86,6 +102,25 @@ impl GameLibraryBridge {
     #[func]
     fn focus_game(&self) {
         arcade_core::gamescope::focus_game();
+    }
+
+    /// Switches to true simultaneous overlay compositing (see
+    /// `arcade_core::gamescope::enter_overlay`) — unlike `focus_launcher`,
+    /// the running game stays visible the whole time; this just puts the
+    /// launcher's own (transparent) window on top of it and gives it
+    /// input focus. **Currently unused/parked**, not called by
+    /// `GameOverlay` — see `arcade_core::gamescope`'s module doc for why
+    /// (gamepad input isn't actually gated by this).
+    #[func]
+    fn enter_overlay(&self) {
+        arcade_core::gamescope::enter_overlay();
+    }
+
+    /// Reverses `enter_overlay` (see `arcade_core::gamescope::exit_overlay`).
+    /// Same "parked" note as `enter_overlay` applies.
+    #[func]
+    fn exit_overlay(&self) {
+        arcade_core::gamescope::exit_overlay();
     }
 
     /// Asks the currently running game to quit (see

@@ -1,6 +1,7 @@
 pub mod game_config;
 pub mod gamescope;
 pub mod http;
+pub mod input_watch;
 pub mod launch;
 pub mod lock;
 pub mod power;

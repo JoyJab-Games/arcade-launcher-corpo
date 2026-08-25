@@ -55,19 +55,43 @@ Concretely, on that branch:
   `arcade-launcher` crashes. Only the Nix-level configuration (does it
   evaluate, does it build) is confirmed.
 - **No PR opened yet** — branch exists and is pushed, that's it.
-- **Nested-gamescope local testing is built (`nix run .#dev-gamescope` in
-  `arcade-launcher-corpo`) but confirmed broken under Hyprland
-  specifically** — not a flag issue, a real unresolved upstream gamescope
-  bug. Confirmed by hand: even with `--backend wayland` forced (not the
-  default `auto`, which was actually picking `headless` - no window at
-  all), gamescope's nested window never registers with Hyprland at
-  all — checked via both `hyprctl clients` and `hyprctl layers`, neither
-  shows it. See https://github.com/ValveSoftware/gamescope/issues/1707
-  and related issues (nested gamescope under wlroots/tiling compositors,
-  Hyprland specifically called out) - no known fix as of writing. If
-  you're not on Hyprland this may just work; if you are, this path is
-  currently a dead end and real-hardware testing via `arcade-os` is the
-  only way to actually exercise the compositor integration for now.
+- **Nested-gamescope local testing (`nix run .#dev-gamescope` in
+  `arcade-launcher-corpo`, run from an ordinary desktop terminal) is
+  confirmed broken under Hyprland specifically** — not a flag issue, a
+  real unresolved upstream gamescope bug. Confirmed by hand: even with
+  `--backend wayland` forced (not the default `auto`, which was actually
+  picking `headless` - no window at all), gamescope's nested window
+  never registers with Hyprland at all — checked via both `hyprctl
+  clients` and `hyprctl layers`, neither shows it. See
+  https://github.com/ValveSoftware/gamescope/issues/1707 and related
+  issues (nested gamescope under wlroots/tiling compositors, Hyprland
+  specifically called out) - no known fix as of writing.
+  `dev-gamescope` also has an **embedded/DRM path**: run the exact same
+  command from a bare TTY instead (Ctrl+Alt+F&lt;n&gt; to a VT with no
+  Wayland/X session, log in, `cd` into the repo) and it auto-detects the
+  missing `WAYLAND_DISPLAY`/`DISPLAY` and switches to `--backend drm` -
+  gamescope's genuine embedded mode, the same one the real cabinet uses.
+  **Tried by hand, also confirmed broken, for a completely unrelated
+  reason.** The good part: it sidesteps the Hyprland bug entirely -
+  VT-switch/DRM-master handoff works fine, gamescope's connector/EDID/mode
+  detection all succeed for real (picked up both monitors correctly). But
+  on this dev machine's Intel Arc A750 (DG2, i915 driver), every actual
+  framebuffer submission then fails with `drmModeAddFB2WithModifiers
+  failed: Invalid argument` - Xwayland/Godot/pipewire all come up looking
+  healthy internally, but nothing ever reaches the screen (silent black
+  screen, not a crash). `--force-composition` doesn't help - gamescope's
+  own composited backbuffer hits the identical AddFB2 failure, so this is
+  gamescope failing to negotiate a working DRM format modifier with this
+  driver/kernel at all, not a client-buffer-specific issue. Matches a
+  real, unresolved upstream bug on Intel iGPUs launched from a TTY - see
+  https://github.com/ValveSoftware/gamescope/issues/1738 (open since Feb
+  2025, no fix, no workaround from maintainers) - not fixable from here.
+  The real cabinet's GPU is AMD, not Intel, so this is plausibly a
+  dev-machine-only dead end rather than something that recurs on real
+  hardware - but that's untested. **Both local testing paths for
+  `dev-gamescope` are now confirmed non-viable on this dev machine**;
+  real-hardware testing via `arcade-os` is the only way left to actually
+  exercise the compositor integration.
 - No crash-vs-clean-exit distinction yet in `arcade_core::launch` (a
   crashed game and a normal quit look identical to the launcher).
 - `arcade-os`'s `configs/steam-boot.nix` still looks like dead/orphaned

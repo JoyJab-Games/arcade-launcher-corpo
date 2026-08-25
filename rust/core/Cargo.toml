@@ -19,6 +19,7 @@ ureq = "2"
 # to a commit (not on crates.io) for the same reproducibility reasons
 # everything else here is pinned.
 gamescope-x11-client = { git = "https://github.com/ShadowBlip/gamescope-x11-client", rev = "922e02a8c941c278e665639c57a1822abd31bee3" }
+evdev = "0.13.2"
 
 [dev-dependencies]
 tempfile = "3"

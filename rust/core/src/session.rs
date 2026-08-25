@@ -2,19 +2,31 @@
 //! exits — the hook the front-end needs to know when to leave its "game is
 //! running" screen and return to the library (see arcade_gdext's
 //! `poll_game_exited` and godot/game_session/game_running_screen.gd, which
-//! polls it once per frame while active). Deliberately separate from both
-//! `launch` (spawning the process) and `gamescope` (compositor-level
-//! focus) — this is purely "does the front-end need to react to a game
-//! having ended", nothing about *how* the game runs or is displayed.
+//! polls it once per frame while active). Also relays the "open the
+//! in-game overview" request from `input_watch`'s evdev listener, for the
+//! same reason: the front-end can't hear about it any other way while a
+//! game holds gamescope's input focus (see `poll_overview_requested`).
+//! Deliberately separate from both `launch` (spawning the process) and
+//! `gamescope` (compositor-level focus) — this is purely "does the
+//! front-end need to react to something", nothing about *how* the game
+//! runs, is displayed, or is controlled.
 use std::process::Command;
 use std::sync::mpsc::{self, Receiver, SyncSender};
 use std::sync::{Mutex, OnceLock};
 
 static CHANNEL: OnceLock<(SyncSender<()>, Mutex<Receiver<()>>)> = OnceLock::new();
+static OVERVIEW_CHANNEL: OnceLock<(SyncSender<()>, Mutex<Receiver<()>>)> = OnceLock::new();
 static CURRENT_PID: Mutex<Option<u32>> = Mutex::new(None);
 
 fn channel() -> &'static (SyncSender<()>, Mutex<Receiver<()>>) {
     CHANNEL.get_or_init(|| {
+        let (tx, rx) = mpsc::sync_channel(1);
+        (tx, Mutex::new(rx))
+    })
+}
+
+fn overview_channel() -> &'static (SyncSender<()>, Mutex<Receiver<()>>) {
+    OVERVIEW_CHANNEL.get_or_init(|| {
         let (tx, rx) = mpsc::sync_channel(1);
         (tx, Mutex::new(rx))
     })
@@ -52,6 +64,40 @@ pub fn poll_game_exited() -> bool {
 /// `spawn_monitor_and_focus`'s own thread already owns, to `wait()` on).
 pub(crate) fn set_current_pid(pid: Option<u32>) {
     *CURRENT_PID.lock().expect("current-pid mutex shouldn't be poisoned") = pid;
+}
+
+/// The PID of whatever game is currently tracked as running, if any — see
+/// `set_current_pid`. Exists for `gamescope::enter_overlay`/`exit_overlay`,
+/// which need to find the running game's window(s) without gamescope.rs
+/// having to separately track that itself.
+pub(crate) fn current_pid() -> Option<u32> {
+    *CURRENT_PID.lock().expect("current-pid mutex shouldn't be poisoned")
+}
+
+/// Called by `input_watch` whenever it sees the overview button (gamepad
+/// Guide / keyboard F1) pressed on a raw evdev device. Only meaningful
+/// while a game is actually running — gated on `CURRENT_PID` rather than
+/// firing unconditionally — because with no game running, this launcher's
+/// own window already has normal input focus and Godot's `ui_overview`
+/// input action handles the same button directly; forwarding it here too
+/// would just open the overview a second, redundant way.
+pub(crate) fn notify_overview_requested() {
+    if CURRENT_PID.lock().expect("current-pid mutex shouldn't be poisoned").is_none() {
+        return;
+    }
+    let (tx, _) = overview_channel();
+    // Same reasoning as `notify_game_exited`: try_send, never block the
+    // evdev-reading thread over this, and a dropped duplicate (someone
+    // mashing the button before anyone's polled) is harmless.
+    let _ = tx.try_send(());
+}
+
+/// True exactly once per overview request — meant to be polled regularly
+/// (e.g. from `GameRunningScreen`'s `_process()`) while a game is running.
+/// See `notify_overview_requested` for what feeds this.
+pub fn poll_overview_requested() -> bool {
+    let (_, rx) = overview_channel();
+    rx.lock().expect("overview channel mutex shouldn't be poisoned").try_recv().is_ok()
 }
 
 /// Asks the currently running game to quit — SIGTERM, not SIGKILL, so it
@@ -94,10 +140,26 @@ mod tests {
         assert!(!poll_game_exited());
     }
 
+    // Also one test, not two: `stop_game` and `notify_overview_requested`
+    // both read/write the same shared `CURRENT_PID` global, so a separate
+    // #[test] fn for each would race it the same way split-up channel
+    // tests would (see above).
     #[test]
-    fn stop_game_asks_the_tracked_pid_to_terminate() {
+    fn current_pid_state_gates_stop_game_and_overview_requests() {
+        // Drain first so this doesn't depend on run order relative to
+        // anything else that happens to touch this same channel.
+        while poll_overview_requested() {}
+
+        set_current_pid(None);
+        notify_overview_requested();
+        assert!(!poll_overview_requested(), "no game running - request should be dropped, not queued");
+
         let mut child = Command::new("sleep").arg("30").spawn().expect("'sleep' should exist on any Unix system");
         set_current_pid(Some(child.id()));
+
+        notify_overview_requested();
+        assert!(poll_overview_requested(), "a game is running - request should be queued");
+        assert!(!poll_overview_requested(), "false again immediately after consuming it");
 
         assert!(stop_game(), "should report success sending SIGTERM to a real running process");
 

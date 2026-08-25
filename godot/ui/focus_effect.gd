@@ -10,9 +10,6 @@ static func apply_focus_effect(node: Control, focused: bool, scale_factor: float
 
 	if focused:
 		node.z_index = 1
-		if node.get_parent():
-			node.get_parent().move_child(node, node.get_parent().get_child_count() - 1)
-
 		tween.tween_property(node, "scale", Vector2.ONE * scale_factor, TWEEN_DURATION)
 	else:
 		node.z_index = 0

@@ -31,6 +31,16 @@ func poll_game_exited() -> bool:
 	return _bridge.poll_game_exited()
 
 
+## True exactly once per "open the in-game overview" request detected by
+## the evdev button watcher (see arcade_core::input_watch) - covers
+## pressing Start/Guide/F1 while the game itself holds normal input focus,
+## which GameRunningScreen's own _unhandled_input can't see happen. Meant
+## to be polled regularly (e.g. from GameRunningScreen's _process()), same
+## shape as poll_game_exited().
+func poll_overview_requested() -> bool:
+	return _bridge.poll_overview_requested()
+
+
 ## Switches gamescope's compositor focus to the launcher, so it's actually
 ## visible over the running game - see GameOverlay.enter().
 func focus_launcher() -> void:
@@ -41,6 +51,22 @@ func focus_launcher() -> void:
 ## GameOverlay.exit().
 func focus_game() -> void:
 	_bridge.focus_game()
+
+
+## Switches to true simultaneous overlay compositing: the running game
+## keeps rendering and stays visible, this launcher's own (transparent)
+## window is composited on top of it and takes input focus. Currently
+## unused/parked, not called by GameOverlay - see
+## arcade_core::gamescope's module doc for why (gamepad input isn't
+## actually gated by this - full switch is what backs GameOverlay for now).
+func enter_overlay() -> void:
+	_bridge.enter_overlay()
+
+
+## Reverses enter_overlay() - input goes back to the game. Same "parked"
+## note as enter_overlay() applies.
+func exit_overlay() -> void:
+	_bridge.exit_overlay()
 
 
 ## Asks the currently running game to quit. False if none is running -
