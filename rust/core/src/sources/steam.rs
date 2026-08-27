@@ -40,9 +40,27 @@ impl GameSource for SteamSource {
             dest.to_string_lossy().into_owned(),
             "+login".to_string(),
             username,
-            "+app_update".to_string(),
-            game.source_ref.clone(),
         ];
+
+        // steamcmd otherwise auto-detects which platform's depot to grab
+        // off the host it's running on (always Linux here) - fine for a
+        // game with a native Linux build, but fatal ("ERROR! Failed to
+        // install app '<id>' (Invalid platform)") for a Windows-only game,
+        // which has no Linux depot for it to fall back to. fetch_metadata
+        // already detects exactly this (find_linux_executable vs
+        // find_windows_executable, see its doc comment) to decide
+        // GameMetadata.proton, but that result never reaches provision(),
+        // so re-derive it here rather than forcing windows unconditionally
+        // (which would wrongly skip a native Linux depot when one exists).
+        if let Some(app_info) = fetch_app_info_text(&game.source_ref) {
+            if let Some(platform) = platform_override(&app_info) {
+                args.push("+@sSteamCmdForcePlatformType".to_string());
+                args.push(platform.to_string());
+            }
+        }
+
+        args.push("+app_update".to_string());
+        args.push(game.source_ref.clone());
         if let Some(branch) = &game.branch {
             args.push("-beta".to_string());
             args.push(branch.clone());
@@ -150,6 +168,40 @@ fn fetch_app_info_text(appid: &str) -> Option<String> {
         .run_capturing(&["+login", "anonymous", "+app_info_print", appid, "+quit"])
         .ok()?;
     Some(String::from_utf8_lossy(&output.stdout).into_owned())
+}
+
+/// Which platform, if any, `provision()` needs to force steamcmd onto via
+/// `@sSteamCmdForcePlatformType` for `text` (`app_info_print` output) to
+/// pick a depot at all.
+///
+/// Deliberately reads `common.oslist` (a comma-separated list like
+/// `"windows,macos,linux"`, Valve's own top-level "which platforms does
+/// this app support at all" field) rather than a launch entry's own oslist
+/// (config.launch.N.config, see find_linux_executable/find_windows_executable
+/// above) or a depot's own oslist (depots.<id>.config) - the launch entry
+/// one only matters for choosing which *executable* to run after install
+/// and isn't reliably present at all for a single-depot title (confirmed
+/// against a real single-depot Windows-only demo, AppID 4191940,
+/// 2026-08-27 - it has zero per-launch-entry or per-depot oslist tags,
+/// only common.oslist), and a title's depot(s) aren't all individually
+/// tagged either unless it actually ships more than one (see AppID
+/// 3900090's `depots.3900091.config.oslist`/`depots.3900092.config.oslist`
+/// for a title that does). common.oslist is the one field confirmed
+/// present in both shapes.
+///
+/// Scoped to before the first `"config"` key (common.oslist always comes
+/// before config/depots in Valve's own emission order) so a differently-
+/// scoped oslist mention further down the file - a launch entry's or a
+/// depot's own - can't be mistaken for common's.
+fn platform_override(text: &str) -> Option<&'static str> {
+    let common_section = text.split_once("\"config\"").map_or(text, |(before, _)| before);
+    let after_key = common_section.split_once("\"oslist\"")?.1;
+    let oslist = quoted_token_after(after_key)?;
+    if oslist.split(',').any(|platform| platform == "linux") {
+        None
+    } else {
+        Some("windows")
+    }
 }
 
 /// Finds the content hash for a `library_assets_full` entry, e.g.
@@ -385,5 +437,92 @@ mod tests {
             }
         "#;
         assert_eq!(find_linux_executable(windows_only), None);
+    }
+
+    // Condensed from real `steamcmd +app_info_print 4191940` output
+    // (2026-08-27) - a single-depot, Windows-only demo with *no*
+    // per-launch-entry or per-depot oslist tag anywhere, only
+    // common.oslist. This is the exact shape that broke the original,
+    // launch-entry-scanning version of platform_override: it found no
+    // oslist at all and skipped the override, so steamcmd fell through to
+    // auto-detecting the host (Linux) platform and failed with "ERROR!
+    // Failed to install app '4191940' (Invalid platform)".
+    const WINDOWS_ONLY_APPINFO_FIXTURE: &str = r#"
+        "4191940"
+        {
+            "common"
+            {
+                "name"		"Spooky Bodies Demo"
+                "type"		"Demo"
+                "oslist"		"windows"
+                "osarch"		"64"
+            }
+            "config"
+            {
+                "installdir"		"Spooky Bodies Demo"
+                "launch"
+                {
+                    "0"
+                    {
+                        "executable"		"spooky-bodies.exe"
+                        "type"		"default"
+                    }
+                }
+            }
+            "depots"
+            {
+                "4191941"
+                {
+                    "manifests" { }
+                }
+            }
+        }
+    "#;
+
+    // Condensed from real `steamcmd +app_info_print 3900090` output
+    // (2026-08-27) - a 3-depot title with a per-depot oslist *and* a
+    // per-launch-entry oslist for each platform, same title LAUNCH_FIXTURE
+    // above is condensed from.
+    const MULTI_PLATFORM_APPINFO_FIXTURE: &str = r#"
+        "3900090"
+        {
+            "common"
+            {
+                "name"		"Wummsen Village Development Demo"
+                "type"		"Demo"
+                "oslist"		"windows,macos,linux"
+            }
+            "config"
+            {
+                "launch"
+                {
+                    "0" { "executable" "WummsenVillage.exe" "config" { "oslist" "windows" } }
+                    "1" { "executable" "WummsenVillage.x86_64" "config" { "oslist" "linux" } }
+                }
+            }
+            "depots"
+            {
+                "3900091" { "config" { "oslist" "windows" } }
+                "3900092" { "config" { "oslist" "linux" } }
+            }
+        }
+    "#;
+
+    #[test]
+    fn platform_override_is_none_when_common_oslist_includes_linux() {
+        // steamcmd's own auto-detection already picks the linux depot
+        // correctly for a multi-platform title, so forcing windows here
+        // would wrongly skip it.
+        assert_eq!(platform_override(MULTI_PLATFORM_APPINFO_FIXTURE), None);
+    }
+
+    #[test]
+    fn platform_override_forces_windows_for_a_windows_only_game() {
+        assert_eq!(platform_override(WINDOWS_ONLY_APPINFO_FIXTURE), Some("windows"));
+    }
+
+    #[test]
+    fn platform_override_is_none_without_a_common_oslist_field() {
+        assert_eq!(platform_override(""), None);
     }
 }
